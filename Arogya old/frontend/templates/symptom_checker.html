@@ -235,6 +235,196 @@
 
 {% block scripts %}
 <script>
+// Rule-based functions for dynamic recommendations
+
+function getSeverityWarning(symptoms, age, bloodPressure, diabetes) {
+    const criticalSymptoms = ['chest_pain', 'shortness_breath'];
+    const hasCriticalSymptoms = symptoms.some(s => criticalSymptoms.includes(s));
+    const highAge = parseInt(age) >= 65;
+    const highBP = bloodPressure === 'high';
+    const hasDiabetes = diabetes && diabetes !== 'no';
+    
+    if (hasCriticalSymptoms || (highAge && (highBP || hasDiabetes))) {
+        return `
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="flex items-start space-x-3">
+                    <div class="bg-red-100 rounded-full p-2">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-red-900">Medical Attention Recommended</h4>
+                        <p class="text-red-800 text-sm mt-1">
+                            Some of your symptoms may need quick medical attention. Seek help if symptoms worsen.
+                            ${hasCriticalSymptoms ? ' Critical symptoms detected.' : ''}
+                            ${highAge ? ' Consider age-related health factors.' : ''}
+                        </p>
+                        <div class="mt-3">
+                            <a href="/find-hospitals" class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition text-sm">
+                                Find Nearest Hospital
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    return '';
+}
+
+function getHomeRemedies(symptoms, predictedCondition) {
+    const remedies = [];
+    
+    // Symptom-based remedies
+    if (symptoms.includes('fever')) {
+        remedies.push('Stay hydrated with plenty of fluids', 'Get adequate rest', 'Apply cool compress to forehead');
+    }
+    
+    if (symptoms.includes('cough') || symptoms.includes('sore_throat')) {
+        remedies.push('Drink warm liquids like tea with honey', 'Try steam inhalation', 'Use a humidifier');
+    }
+    
+    if (symptoms.includes('body_ache') || symptoms.includes('fatigue')) {
+        remedies.push('Apply warm compress to sore areas', 'Gentle stretching exercises', 'Ensure proper rest');
+    }
+    
+    if (symptoms.includes('diarrhea') || symptoms.includes('vomiting')) {
+        remedies.push('Take Oral Rehydration Solution (ORS)', 'Eat soft, bland foods', 'Avoid dairy and oily foods');
+    }
+    
+    if (symptoms.includes('headache')) {
+        remedies.push('Rest in a quiet, dark room', 'Apply cold compress to forehead', 'Stay hydrated');
+    }
+    
+    if (symptoms.includes('stomach_pain')) {
+        remedies.push('Eat small, frequent meals', 'Avoid spicy and oily foods', 'Drink peppermint tea');
+    }
+    
+    // Condition-specific remedies
+    if (predictedCondition) {
+        const condition = predictedCondition.toLowerCase();
+        if (condition.includes('cold') || condition.includes('flu')) {
+            remedies.push('Increase fluid intake', 'Get plenty of rest', 'Use saline nasal spray');
+        }
+        if (condition.includes('digestive') || condition.includes('gastro')) {
+            remedies.push('Eat probiotic-rich foods', 'Avoid trigger foods', 'Maintain regular meal times');
+        }
+    }
+    
+    // Critical symptoms warning
+    const criticalSymptoms = ['chest_pain', 'shortness_breath'];
+    const hasCriticalSymptoms = symptoms.some(s => criticalSymptoms.includes(s));
+    
+    if (hasCriticalSymptoms) {
+        return `
+            <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+                <h4 class="font-bold text-red-900 mb-2">Immediate Medical Attention Required</h4>
+                <p class="text-red-800 text-sm">Some of your symptoms require immediate medical evaluation. Please seek emergency care.</p>
+                <div class="mt-3">
+                    <a href="/find-hospitals" class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition text-sm">
+                        Find Emergency Care
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (remedies.length === 0) {
+        return '';
+    }
+    
+    return `
+        <div>
+            <h4 class="font-bold text-gray-900 mb-3">Home Remedies & First Aid</h4>
+            <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <ul class="space-y-2 text-blue-800">
+                    ${remedies.slice(0, 5).map(remedy => `
+                        <li class="flex items-start space-x-2">
+                            <svg class="h-5 w-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <span>${remedy}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+                <p class="text-xs text-blue-600 mt-3">These are general suggestions. Consult a doctor for persistent symptoms.</p>
+            </div>
+        </div>
+    `;
+}
+
+function getLifestyleSuggestions(predictedCondition, age, bloodPressure, diabetes) {
+    const suggestions = [];
+    
+    // Age-based suggestions
+    const ageNum = parseInt(age);
+    if (ageNum >= 65) {
+        suggestions.push('Regular health check-ups', 'Maintain social connections', 'Fall prevention exercises');
+    }
+    
+    // Blood pressure suggestions
+    if (bloodPressure === 'high') {
+        suggestions.push('Reduce salt intake', 'Daily 30-minute walk', 'Practice stress management');
+    } else if (bloodPressure === 'low') {
+        suggestions.push('Stay well hydrated', 'Eat smaller frequent meals', 'Avoid standing up quickly');
+    }
+    
+    // Diabetes suggestions
+    if (diabetes === 'type1' || diabetes === 'type2') {
+        suggestions.push('Monitor blood sugar regularly', 'Follow prescribed meal plan', 'Regular foot care');
+    }
+    
+    // Condition-based suggestions
+    if (predictedCondition) {
+        const condition = predictedCondition.toLowerCase();
+        
+        if (condition.includes('hypertension') || condition.includes('blood pressure')) {
+            suggestions.push('Limit sodium to less than 2,300mg/day', 'Maintain healthy weight', 'Limit alcohol consumption');
+        }
+        
+        if (condition.includes('cold') || condition.includes('flu') || condition.includes('respiratory')) {
+            suggestions.push('Boost immunity with vitamin C rich foods', 'Get adequate sleep', 'Practice good hygiene');
+        }
+        
+        if (condition.includes('digestive') || condition.includes('stomach') || condition.includes('gastro')) {
+            suggestions.push('Eat fiber-rich foods', 'Stay hydrated', 'Eat meals at regular times');
+        }
+        
+        if (condition.includes('stress') || condition.includes('anxiety') || condition.includes('migraine')) {
+            suggestions.push('Practice meditation or yoga', 'Maintain regular sleep schedule', 'Limit caffeine intake');
+        }
+        
+        if (condition.includes('diabetes')) {
+            suggestions.push('Choose whole grains over refined', 'Portion control', 'Regular physical activity');
+        }
+    }
+    
+    // General wellness suggestions
+    if (suggestions.length === 0) {
+        suggestions.push('Maintain balanced diet', 'Get 7-8 hours of sleep', 'Stay physically active');
+    }
+    
+    return `
+        <div>
+            <h4 class="font-bold text-gray-900 mb-3">Lifestyle Suggestions</h4>
+            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                <ul class="space-y-2 text-green-800">
+                    ${suggestions.slice(0, 4).map(suggestion => `
+                        <li class="flex items-start space-x-2">
+                            <svg class="h-5 w-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <span>${suggestion}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+                <p class="text-xs text-green-600 mt-3">Personalized recommendations based on your health profile</p>
+            </div>
+        </div>
+    `;
+}
+
 document.getElementById('symptomForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -311,6 +501,9 @@ document.getElementById('symptomForm').addEventListener('submit', async function
                     </div>
                 </div>
                 
+                <!-- Severity Warning -->
+                ${getSeverityWarning(symptoms, age, bloodPressure, diabetes)}
+                
                 <!-- Patient Profile -->
                 ${age || bloodPressure || diabetes ? `
                 <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
@@ -348,6 +541,12 @@ document.getElementById('symptomForm').addEventListener('submit', async function
                     </div>
                 </div>
                 
+                <!-- Home Remedies / First Aid -->
+                ${getHomeRemedies(symptoms, result.predictions[0]?.condition)}
+                
+                <!-- Lifestyle Suggestions -->
+                ${getLifestyleSuggestions(result.predictions[0]?.condition, age, bloodPressure, diabetes)}
+                
                 <!-- Symptoms Identified -->
                 ${symptoms.length > 0 ? `
                 <div>
@@ -364,7 +563,7 @@ document.getElementById('symptomForm').addEventListener('submit', async function
                 
                 <!-- Recommendations -->
                 <div>
-                    <h4 class="font-bold text-gray-900 mb-3">Recommendations:</h4>
+                    <h4 class="font-bold text-gray-900 mb-3">Medical Recommendations:</h4>
                     <div class="bg-green-50 rounded-lg p-4 border border-green-200">
                         <ul class="space-y-2 text-green-800">
                             <li class="flex items-start space-x-2">
