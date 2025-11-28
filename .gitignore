@@ -25,6 +25,11 @@ venv/
 env/
 ENV/
 
+# Next.js (should not exist in Python project)
+.next/
+out/
+build/
+
 # Node.js (should not exist in Python project)
 node_modules/
 *.npm
