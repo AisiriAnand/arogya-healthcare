@@ -110,8 +110,8 @@ def symptom_check():
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5001))
-    print(f"🚀 AROGYA Frontend server running on http://localhost:{port}")
-    print("📱 Available routes:")
+    print(f"AROGYA Frontend server running on http://localhost:{port}")
+    print("Available routes:")
     print("   / - Home page")
     print("   /dashboard - Dashboard")
     print("   /symptom-checker - Symptom checker")
