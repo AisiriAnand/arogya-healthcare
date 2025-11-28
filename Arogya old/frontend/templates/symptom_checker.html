@@ -274,45 +274,7 @@ function getSeverityWarning(symptoms, age, bloodPressure, diabetes) {
 }
 
 function getHomeRemedies(symptoms, predictedCondition) {
-    const remedies = [];
-    
-    // Symptom-based remedies
-    if (symptoms.includes('fever')) {
-        remedies.push('Stay hydrated with plenty of fluids', 'Get adequate rest', 'Apply cool compress to forehead');
-    }
-    
-    if (symptoms.includes('cough') || symptoms.includes('sore_throat')) {
-        remedies.push('Drink warm liquids like tea with honey', 'Try steam inhalation', 'Use a humidifier');
-    }
-    
-    if (symptoms.includes('body_ache') || symptoms.includes('fatigue')) {
-        remedies.push('Apply warm compress to sore areas', 'Gentle stretching exercises', 'Ensure proper rest');
-    }
-    
-    if (symptoms.includes('diarrhea') || symptoms.includes('vomiting')) {
-        remedies.push('Take Oral Rehydration Solution (ORS)', 'Eat soft, bland foods', 'Avoid dairy and oily foods');
-    }
-    
-    if (symptoms.includes('headache')) {
-        remedies.push('Rest in a quiet, dark room', 'Apply cold compress to forehead', 'Stay hydrated');
-    }
-    
-    if (symptoms.includes('stomach_pain')) {
-        remedies.push('Eat small, frequent meals', 'Avoid spicy and oily foods', 'Drink peppermint tea');
-    }
-    
-    // Condition-specific remedies
-    if (predictedCondition) {
-        const condition = predictedCondition.toLowerCase();
-        if (condition.includes('cold') || condition.includes('flu')) {
-            remedies.push('Increase fluid intake', 'Get plenty of rest', 'Use saline nasal spray');
-        }
-        if (condition.includes('digestive') || condition.includes('gastro')) {
-            remedies.push('Eat probiotic-rich foods', 'Avoid trigger foods', 'Maintain regular meal times');
-        }
-    }
-    
-    // Critical symptoms warning
+    // Critical symptoms - immediate medical attention
     const criticalSymptoms = ['chest_pain', 'shortness_breath'];
     const hasCriticalSymptoms = symptoms.some(s => criticalSymptoms.includes(s));
     
@@ -330,7 +292,296 @@ function getHomeRemedies(symptoms, predictedCondition) {
         `;
     }
     
-    if (remedies.length === 0) {
+    // Dynamic remedies based on predicted condition
+    if (!predictedCondition) {
+        return '';
+    }
+    
+    const condition = predictedCondition.toLowerCase();
+    let remedies = [];
+    
+    // Condition-specific dynamic remedies
+    if (condition.includes('fungal infection')) {
+        remedies = [
+            'Keep affected area clean and dry',
+            'Apply antifungal cream (over-the-counter)',
+            'Wear loose-fitting clothing',
+            'Avoid sharing personal items'
+        ];
+    } else if (condition.includes('allergy')) {
+        remedies = [
+            'Identify and avoid allergens',
+            'Use saline nasal rinse',
+            'Take over-the-counter antihistamines',
+            'Use air purifiers indoors'
+        ];
+    } else if (condition.includes('gerd') || condition.includes('reflux')) {
+        remedies = [
+            'Eat smaller, frequent meals',
+            'Avoid trigger foods (spicy, fatty)',
+            'Elevate head while sleeping',
+            'Wait 3 hours after eating before lying down'
+        ];
+    } else if (condition.includes('diabetes')) {
+        remedies = [
+            'Monitor blood sugar regularly',
+            'Stay hydrated',
+            'Eat balanced meals with complex carbs',
+            'Carry glucose tablets for low blood sugar'
+        ];
+    } else if (condition.includes('migraine')) {
+        remedies = [
+            'Rest in dark, quiet room',
+            'Apply cold compress to forehead',
+            'Stay hydrated',
+            'Practice stress management techniques'
+        ];
+    } else if (condition.includes('pneumonia')) {
+        remedies = [
+            'Get plenty of rest',
+            'Stay hydrated with warm fluids',
+            'Use humidifier to ease breathing',
+            'Take over-the-counter fever reducers'
+        ];
+    } else if (condition.includes('chicken pox')) {
+        remedies = [
+            'Take cool baths with oatmeal',
+            'Apply calamine lotion to reduce itching',
+            'Keep fingernails trimmed to prevent scratching',
+            'Stay hydrated and eat soft foods'
+        ];
+    } else if (condition.includes('dengue')) {
+        remedies = [
+            'Stay hydrated with plenty of fluids',
+            'Get adequate rest',
+            'Take over-the-counter fever reducers',
+            'Monitor for warning signs (bleeding, severe pain)'
+        ];
+    } else if (condition.includes('typhoid')) {
+        remedies = [
+            'Stay hydrated with oral rehydration solution',
+            'Eat easily digestible foods',
+            'Get plenty of rest',
+            'Maintain good hygiene to prevent spread'
+        ];
+    } else if (condition.includes('hepatitis')) {
+        remedies = [
+            'Get plenty of rest',
+            'Eat small, frequent nutritious meals',
+            'Avoid alcohol completely',
+            'Stay hydrated'
+        ];
+    } else if (condition.includes('hypertension') || condition.includes('high blood pressure')) {
+        remedies = [
+            'Reduce sodium intake',
+            'Practice relaxation techniques',
+            'Get regular moderate exercise',
+            'Limit caffeine and alcohol'
+        ];
+    } else if (condition.includes('bronchitis') || condition.includes('respiratory')) {
+        remedies = [
+            'Use humidifier or steam inhalation',
+            'Drink warm liquids',
+            'Get plenty of rest',
+            'Avoid smoke and irritants'
+        ];
+    } else if (condition.includes('gastroenteritis') || condition.includes('stomach flu')) {
+        remedies = [
+            'Take oral rehydration solution',
+            'Eat bland foods (BRAT diet)',
+            'Avoid dairy and fatty foods',
+            'Get adequate rest'
+        ];
+    } else if (condition.includes('urinary tract infection') || condition.includes('uti')) {
+        remedies = [
+            'Drink plenty of water',
+            'Urinate frequently when needed',
+            'Take over-the-counter pain relievers',
+            'Apply heating pad to lower abdomen'
+        ];
+    } else if (condition.includes('arthritis')) {
+        remedies = [
+            'Apply warm or cold compresses',
+            'Gentle range-of-motion exercises',
+            'Maintain healthy weight',
+            'Use over-the-counter anti-inflammatory medications'
+        ];
+    } else if (condition.includes('eczema') || condition.includes('dermatitis')) {
+        remedies = [
+            'Moisturize skin regularly',
+            'Avoid harsh soaps and detergents',
+            'Apply cold compress for itching',
+            'Wear soft, breathable fabrics'
+        ];
+    } else if (condition.includes('psoriasis')) {
+        remedies = [
+            'Keep skin moisturized',
+            'Use gentle, fragrance-free products',
+            'Get moderate sun exposure',
+            'Manage stress levels'
+        ];
+    } else if (condition.includes('impetigo')) {
+        remedies = [
+            'Keep affected area clean',
+            'Apply antibiotic ointment',
+            'Cover with clean bandage',
+            'Avoid scratching or picking'
+        ];
+    } else if (condition.includes('acne')) {
+        remedies = [
+            'Clean skin gently twice daily',
+            'Use non-comedogenic products',
+            'Avoid touching or squeezing pimples',
+            'Use over-the-counter acne treatments'
+        ];
+    } else if (condition.includes('vitiligo')) {
+        remedies = [
+            'Protect skin from sun exposure',
+            'Use gentle skincare products',
+            'Consider cosmetic camouflage options',
+            'Manage stress levels'
+        ];
+    } else if (condition.includes('jaundice')) {
+        remedies = [
+            'Get plenty of rest',
+            'Stay hydrated',
+            'Eat small, frequent meals',
+            'Avoid alcohol and fatty foods'
+        ];
+    } else if (condition.includes('malaria')) {
+        remedies = [
+            'Get plenty of rest',
+            'Stay hydrated',
+            'Take over-the-counter fever reducers',
+            'Eat nutritious meals'
+        ];
+    } else if (condition.includes('chikungunya')) {
+        remedies = [
+            'Get adequate rest',
+            'Stay hydrated',
+            'Take over-the-counter pain relievers',
+            'Use gentle stretching for joint pain'
+        ];
+    } else if (condition.includes('food poisoning')) {
+        remedies = [
+            'Stay hydrated with ORS',
+            'Eat bland, easy-to-digest foods',
+            'Get plenty of rest',
+            'Avoid dairy and fatty foods'
+        ];
+    } else if (condition.includes('vertigo')) {
+        remedies = [
+            'Sit or lie down immediately when dizzy',
+            'Focus on a fixed point',
+            'Avoid sudden movements',
+            'Stay hydrated'
+        ];
+    } else if (condition.includes('hypothyroidism')) {
+        remedies = [
+            'Take prescribed medication regularly',
+            'Eat iodine-rich foods',
+            'Get regular exercise',
+            'Manage stress levels'
+        ];
+    } else if (condition.includes('hyperthyroidism')) {
+        remedies = [
+            'Avoid caffeine and stimulants',
+            'Practice stress management',
+            'Eat small, frequent meals',
+            'Get regular moderate exercise'
+        ];
+    } else if (condition.includes('heart attack') || condition.includes('cardiac')) {
+        remedies = [
+            'CALL EMERGENCY SERVICES IMMEDIATELY',
+            'Chew aspirin if available and not allergic',
+            'Sit or lie down comfortably',
+            'Loosen tight clothing'
+        ];
+    } else if (condition.includes('stroke')) {
+        remedies = [
+            'CALL EMERGENCY SERVICES IMMEDIATELY',
+            'Note time symptoms started',
+            'Keep person comfortable and calm',
+            'Do not give food or drink'
+        ];
+    } else if (condition.includes('paralysis')) {
+        remedies = [
+            'Seek immediate medical attention',
+            'Follow prescribed rehabilitation plan',
+            'Prevent pressure sores',
+            'Maintain proper positioning'
+        ];
+    } else if (condition.includes('alcoholic hepatitis')) {
+        remedies = [
+            'Stop alcohol consumption completely',
+            'Get nutritional support',
+            'Stay hydrated',
+            'Follow medical treatment plan'
+        ];
+    } else if (condition.includes('chronic cholestasis')) {
+        remedies = [
+            'Follow prescribed medical treatment',
+            'Eat low-fat diet',
+            'Stay hydrated',
+            'Avoid alcohol'
+        ];
+    } else if (condition.includes('drug reaction')) {
+        remedies = [
+            'Stop taking suspected medication',
+            'Seek medical attention',
+            'Stay hydrated',
+            'Monitor for severe reactions'
+        ];
+    } else if (condition.includes('peptic ulcer')) {
+        remedies = [
+            'Avoid spicy and acidic foods',
+            'Eat small, frequent meals',
+            'Avoid smoking and alcohol',
+            'Manage stress levels'
+        ];
+    } else if (condition.includes('dimorphic hemorrhoids')) {
+        remedies = [
+            'Increase fiber intake',
+            'Stay hydrated',
+            'Use warm Sitz baths',
+            'Avoid straining during bowel movements'
+        ];
+    } else {
+        // Generic remedies for unknown conditions
+        remedies = [
+            'Get adequate rest',
+            'Stay hydrated',
+            'Eat nutritious meals',
+            'Monitor symptoms and seek medical attention if worsens'
+        ];
+    }
+    
+    // Add symptom-based remedies if condition-specific ones are insufficient
+    const symptomRemedies = [];
+    if (symptoms.includes('fever') && !remedies.some(r => r.includes('rest') || r.includes('hydrate'))) {
+        symptomRemedies.push('Stay hydrated with plenty of fluids');
+        symptomRemedies.push('Get adequate rest');
+    }
+    
+    if (symptoms.includes('cough') && !remedies.some(r => r.includes('warm') || r.includes('steam'))) {
+        symptomRemedies.push('Drink warm liquids like tea with honey');
+        symptomRemedies.push('Try steam inhalation');
+    }
+    
+    if (symptoms.includes('body_ache') && !remedies.some(r => r.includes('compress') || r.includes('stretch'))) {
+        symptomRemedies.push('Apply warm compress to sore areas');
+        symptomRemedies.push('Gentle stretching exercises');
+    }
+    
+    if (symptoms.includes('diarrhea') && !remedies.some(r => r.includes('ORS') || r.includes('soft'))) {
+        symptomRemedies.push('Take Oral Rehydration Solution (ORS)');
+        symptomRemedies.push('Eat soft, bland foods');
+    }
+    
+    // Combine condition and symptom remedies
+    const allRemedies = [...remedies, ...symptomRemedies];
+    
+    if (allRemedies.length === 0) {
         return '';
     }
     
@@ -339,7 +590,7 @@ function getHomeRemedies(symptoms, predictedCondition) {
             <h4 class="font-bold text-gray-900 mb-3">Home Remedies & First Aid</h4>
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
                 <ul class="space-y-2 text-blue-800">
-                    ${remedies.slice(0, 5).map(remedy => `
+                    ${allRemedies.slice(0, 5).map(remedy => `
                         <li class="flex items-start space-x-2">
                             <svg class="h-5 w-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
