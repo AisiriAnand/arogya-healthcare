@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Symptom Checker - AROGYA Healthcare{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">AI Symptom Checker</h1>
+        <p class="text-gray-600">Tell us your symptoms and get instant health recommendations</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8">
+        <!-- Symptom Form -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold mb-4">Select Your Symptoms</h2>
+            <form id="symptomForm">
+                <div class="space-y-4">
+                    <!-- Common Symptoms -->
+                    <div class="border rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">Common Symptoms</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="headache" class="rounded">
+                                <span>Headache</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="fever" class="rounded">
+                                <span>Fever</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="cough" class="rounded">
+                                <span>Cough</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="fatigue" class="rounded">
+                                <span>Fatigue</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="nausea" class="rounded">
+                                <span>Nausea</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="body_ache" class="rounded">
+                                <span>Body Ache</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Respiratory -->
+                    <div class="border rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">Respiratory</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="shortness_breath" class="rounded">
+                                <span>Shortness of Breath</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="chest_pain" class="rounded">
+                                <span>Chest Pain</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="sore_throat" class="rounded">
+                                <span>Sore Throat</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="runny_nose" class="rounded">
+                                <span>Runny Nose</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Digestive -->
+                    <div class="border rounded-lg p-4">
+                        <h3 class="font-semibold mb-3">Digestive</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="stomach_pain" class="rounded">
+                                <span>Stomach Pain</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="diarrhea" class="rounded">
+                                <span>Diarrhea</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="constipation" class="rounded">
+                                <span>Constipation</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" name="symptoms" value="vomiting" class="rounded">
+                                <span>Vomiting</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Additional Info -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Additional Symptoms (describe in your own words)
+                        </label>
+                        <textarea name="additional_symptoms" rows="3" class="w-full border rounded-lg p-2" 
+                                  placeholder="Describe any other symptoms you're experiencing..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            How long have you had these symptoms?
+                        </label>
+                        <select name="duration" class="w-full border rounded-lg p-2">
+                            <option value="">Select duration</option>
+                            <option value="less_than_day">Less than a day</option>
+                            <option value="1-3_days">1-3 days</option>
+                            <option value="4-7_days">4-7 days</option>
+                            <option value="1-2_weeks">1-2 weeks</option>
+                            <option value="more_than_2_weeks">More than 2 weeks</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                        Analyze Symptoms
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold mb-4">Analysis Results</h2>
+                <div id="resultsContent">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Initial Info Card -->
+        <div id="infoCard" class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-6">
+            <div class="flex items-start space-x-4">
+                <div class="bg-blue-100 rounded-full p-3">
+                    <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-bold text-gray-900 mb-2">How to Use This Tool</h3>
+                    <ol class="text-gray-600 space-y-1 text-sm">
+                        <li>1. Select all symptoms you're experiencing</li>
+                        <li>2. Add any additional symptoms in the text box</li>
+                        <li>3. Specify how long you've had these symptoms</li>
+                        <li>4. Click "Analyze Symptoms" for instant results</li>
+                    </ol>
+                    <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <p class="text-sm text-yellow-800">
+                            <strong>Important:</strong> This tool is for informational purposes only and not a substitute for professional medical advice.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Warning -->
+    <div class="mt-8 bg-red-50 border border-red-200 rounded-lg p-6">
+        <div class="flex items-start space-x-4">
+            <div class="bg-red-100 rounded-full p-2">
+                <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-red-900 mb-2">Seek Immediate Medical Attention If:</h3>
+                <ul class="text-red-800 space-y-1 text-sm">
+                    <li>• Severe chest pain or difficulty breathing</li>
+                    <li>• Sudden severe headache or confusion</li>
+                    <li>• Loss of consciousness or fainting</li>
+                    <li>• Uncontrolled bleeding</li>
+                    <li>• Severe allergic reaction (swelling, difficulty breathing)</li>
+                </ul>
+                <div class="mt-4">
+                    <a href="/find-hospitals" class="bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition">
+                        Find Nearest Hospital
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('symptomForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Get selected symptoms
+    const checkboxes = document.querySelectorAll('input[name="symptoms"]:checked');
+    const symptoms = Array.from(checkboxes).map(cb => cb.value);
+    const additionalSymptoms = document.querySelector('textarea[name="additional_symptoms"]').value;
+    const duration = document.querySelector('select[name="duration"]').value;
+    
+    if (symptoms.length === 0 && !additionalSymptoms) {
+        alert('Please select at least one symptom or describe your symptoms');
+        return;
+    }
+    
+    // Show loading
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsContent = document.getElementById('resultsContent');
+    const infoCard = document.getElementById('infoCard');
+    
+    resultsSection.classList.remove('hidden');
+    infoCard.classList.add('hidden');
+    resultsContent.innerHTML = `
+        <div class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            <p class="mt-4 text-gray-600">Analyzing your symptoms...</p>
+        </div>
+    `;
+    
+    try {
+        // Call API
+        const response = await fetch('/api/symptom-check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                symptoms: symptoms,
+                additional_symptoms: additionalSymptoms,
+                duration: duration
+            })
+        });
+        
+        const result = await response.json();
+        
+        // Display results
+        let severityColor = 'green';
+        let severityText = 'Mild';
+        
+        if (result.severity === 'moderate') {
+            severityColor = 'yellow';
+            severityText = 'Moderate';
+        } else if (result.severity === 'severe') {
+            severityColor = 'red';
+            severityText = 'Severe';
+        }
+        
+        resultsContent.innerHTML = `
+            <div class="space-y-6">
+                <!-- Severity Indicator -->
+                <div class="bg-${severityColor}-50 border border-${severityColor}-200 rounded-lg p-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-${severityColor}-100 rounded-full p-2">
+                            <svg class="h-6 w-6 text-${severityColor}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-${severityColor}-900">Severity: ${severityText}</h3>
+                            <p class="text-${severityColor}-700">Based on your symptoms</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recommendations -->
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-3">Recommendations:</h4>
+                    <ul class="space-y-2">
+                        ${result.recommendations.map(rec => `
+                            <li class="flex items-start space-x-2">
+                                <svg class="h-5 w-5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="text-gray-700">${rec}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                
+                <!-- Possible Conditions -->
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-3">Possible Conditions:</h4>
+                    <div class="space-y-2">
+                        ${result.possible_conditions.map(condition => `
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <p class="font-medium text-gray-800">${condition}</p>
+                                <p class="text-sm text-gray-600">Consult a doctor for proper diagnosis</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex space-x-4">
+                    <a href="/find-hospitals" class="flex-1 bg-purple-600 text-white py-2 rounded-lg font-semibold hover:bg-purple-700 transition text-center">
+                        Find Hospitals
+                    </a>
+                    <button onclick="window.print()" class="flex-1 border border-purple-600 text-purple-600 py-2 rounded-lg font-semibold hover:bg-purple-50 transition">
+                        Print Results
+                    </button>
+                </div>
+                
+                <!-- Disclaimer -->
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p class="text-sm text-gray-600">
+                        <strong>Medical Disclaimer:</strong> This analysis is for informational purposes only and not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider.
+                    </p>
+                </div>
+            </div>
+        `;
+        
+    } catch (error) {
+        resultsContent.innerHTML = `
+            <div class="text-center py-8">
+                <div class="bg-red-100 rounded-full p-3 inline-block">
+                    <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+                <p class="mt-4 text-red-600">Unable to analyze symptoms. Please try again.</p>
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %}

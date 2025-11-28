@@ -1,0 +1,527 @@
+{
+  "api_endpoints_audit": {
+    "timestamp": "2025-11-27T09:00:00Z",
+    "project": "AROGYA Healthcare Platform",
+    "summary": {
+      "total_endpoints_used": 8,
+      "implemented_in_backend": 3,
+      "implemented_in_frontend": 2,
+      "external_apis": 3,
+      "missing_implementations": 0
+    }
+  },
+  "endpoints": {
+    "backend_express_endpoints": [
+      {
+        "id": "BE_001",
+        "path": "/api/health",
+        "method": "GET",
+        "status": "IMPLEMENTED",
+        "location": "backend/server.js:13-15",
+        "description": "Health check endpoint",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:5000/api/health"
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "status": "Backend server is running"
+          }
+        },
+        "frontend_usage": "NONE (not called from frontend)",
+        "notes": "Mock endpoint for testing backend availability"
+      },
+      {
+        "id": "BE_002",
+        "path": "/api/doctors",
+        "method": "GET",
+        "status": "IMPLEMENTED",
+        "location": "backend/server.js:18-46",
+        "description": "Get list of doctors",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:5000/api/doctors"
+        },
+        "response": {
+          "status": 200,
+          "body": [
+            {
+              "id": 1,
+              "name": "Dr. Rajesh Kumar",
+              "specialty": "General Medicine",
+              "hospital": "Rural Health Center",
+              "experience": 10,
+              "rating": 4.5
+            }
+          ]
+        },
+        "frontend_usage": "NONE (not called from frontend)",
+        "notes": "Returns hardcoded mock data"
+      },
+      {
+        "id": "BE_003",
+        "path": "/api/articles",
+        "method": "GET",
+        "status": "IMPLEMENTED",
+        "location": "backend/server.js:49-69",
+        "description": "Get health articles",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:5000/api/articles"
+        },
+        "response": {
+          "status": 200,
+          "body": [
+            {
+              "id": 1,
+              "title": "Understanding Diabetes",
+              "category": "Chronic Diseases",
+              "content": "Diabetes is a chronic disease...",
+              "author": "Dr. Health Expert",
+              "date": "2024-01-15"
+            }
+          ]
+        },
+        "frontend_usage": "NONE (not called from frontend)",
+        "notes": "Returns hardcoded mock data"
+      },
+      {
+        "id": "BE_004",
+        "path": "/api/reminders",
+        "method": "GET",
+        "status": "IMPLEMENTED",
+        "location": "backend/server.js:72-83",
+        "description": "Get medication reminders",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:5000/api/reminders"
+        },
+        "response": {
+          "status": 200,
+          "body": [
+            {
+              "id": 1,
+              "medication": "Aspirin",
+              "dosage": "100mg",
+              "frequency": "Once daily",
+              "time": "08:00 AM"
+            }
+          ]
+        },
+        "frontend_usage": "NONE (not called from frontend)",
+        "notes": "Returns hardcoded mock data"
+      }
+    ],
+    "next_js_api_routes": [
+      {
+        "id": "FE_API_001",
+        "path": "/api/hospitals",
+        "method": "GET",
+        "status": "IMPLEMENTED_BUT_BROKEN",
+        "location": "app/api/hospitals/route.ts:1-149",
+        "description": "Get hospitals with filtering",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:3000/api/hospitals?type=AYUSH&state=Karnataka&query=hospital_name",
+          "parameters": [
+            {
+              "name": "type",
+              "type": "string",
+              "description": "Hospital type (AYUSH, ESIC, Defence, Railway)",
+              "required": false
+            },
+            {
+              "name": "state",
+              "type": "string",
+              "description": "State name",
+              "required": false
+            },
+            {
+              "name": "query",
+              "type": "string",
+              "description": "Search query for hospital name",
+              "required": false
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "body": [
+            {
+              "id": "ayush-0",
+              "name": "Hospital Name",
+              "type": "AYUSH",
+              "category": "Ayurvedic",
+              "state": "Karnataka",
+              "district": "Bangalore",
+              "address": "123 Main St",
+              "beds": 50,
+              "latitude": 12.9716,
+              "longitude": 77.5946,
+              "hasEmergency": true,
+              "ruralUrban": "Urban"
+            }
+          ]
+        },
+        "frontend_usage": [
+          "app/find-hospitals/page.tsx:68 - searchHospitals() function"
+        ],
+        "issue": "CSV files not found in public/data/ directory - endpoint will fail with 500 error",
+        "required_csv_files": [
+          "public/data/AYUSHHospitals.csv",
+          "public/data/Employees State Insurance Corporation.csv",
+          "public/data/Hospitals and Beds maintained by Ministry of Defence.csv",
+          "public/data/Hospitals and beds maintained by Railways.csv"
+        ]
+      },
+      {
+        "id": "FE_API_002",
+        "path": "/api/location",
+        "method": "GET",
+        "status": "IMPLEMENTED",
+        "location": "app/api/location/route.ts:3-33",
+        "description": "Search locations by query",
+        "request": {
+          "method": "GET",
+          "url": "http://localhost:3000/api/location?query=Bangalore",
+          "parameters": [
+            {
+              "name": "query",
+              "type": "string",
+              "description": "Location search query",
+              "required": true
+            }
+          ]
+        },
+        "response": {
+          "status": 200,
+          "body": [
+            {
+              "place_id": 123456,
+              "lat": "12.9716",
+              "lon": "77.5946",
+              "display_name": "Bangalore, Karnataka, India",
+              "address": {
+                "city": "Bangalore",
+                "state": "Karnataka",
+                "country": "India"
+              }
+            }
+          ]
+        },
+        "frontend_usage": [
+          "services/location-service.ts:48-69 - searchLocations() function"
+        ],
+        "external_api": "OpenStreetMap Nominatim",
+        "notes": "Proxies to Nominatim API, filters for India only"
+      },
+      {
+        "id": "FE_API_003",
+        "path": "/api/location",
+        "method": "POST",
+        "status": "IMPLEMENTED",
+        "location": "app/api/location/route.ts:35-65",
+        "description": "Reverse geocoding - get address from coordinates",
+        "request": {
+          "method": "POST",
+          "url": "http://localhost:3000/api/location",
+          "body": {
+            "latitude": 12.9716,
+            "longitude": 77.5946
+          }
+        },
+        "response": {
+          "status": 200,
+          "body": {
+            "place_id": 123456,
+            "lat": "12.9716",
+            "lon": "77.5946",
+            "display_name": "Bangalore, Karnataka, India",
+            "address": {
+              "city": "Bangalore",
+              "state": "Karnataka",
+              "country": "India"
+            }
+          }
+        },
+        "frontend_usage": [
+          "services/location-service.ts:24-45 - getLocationDetails() function"
+        ],
+        "external_api": "OpenStreetMap Nominatim",
+        "notes": "Reverse geocoding endpoint"
+      }
+    ],
+    "external_apis": [
+      {
+        "id": "EXT_001",
+        "name": "OpenStreetMap Nominatim - Search",
+        "url": "https://nominatim.openstreetmap.org/search",
+        "method": "GET",
+        "status": "WORKING",
+        "description": "Search for locations by name",
+        "frontend_usage": [
+          "services/location-service.ts:48-69 - searchLocations()",
+          "app/api/location/route.ts:13-28 - GET /api/location"
+        ],
+        "request": {
+          "url": "https://nominatim.openstreetmap.org/search?format=json&q=Bangalore&limit=5&addressdetails=1&countrycodes=in",
+          "parameters": [
+            {
+              "name": "q",
+              "description": "Search query"
+            },
+            {
+              "name": "countrycodes",
+              "description": "Limit to India (in)"
+            },
+            {
+              "name": "limit",
+              "description": "Max results (5)"
+            }
+          ]
+        },
+        "rate_limit": "1 request per second",
+        "notes": "Used for location search and hospital discovery"
+      },
+      {
+        "id": "EXT_002",
+        "name": "OpenStreetMap Nominatim - Reverse",
+        "url": "https://nominatim.openstreetmap.org/reverse",
+        "method": "GET",
+        "status": "WORKING",
+        "description": "Get address from coordinates",
+        "frontend_usage": [
+          "services/location-service.ts:24-45 - getLocationDetails()",
+          "app/api/location/route.ts:45-60 - POST /api/location"
+        ],
+        "request": {
+          "url": "https://nominatim.openstreetmap.org/reverse?format=json&lat=12.9716&lon=77.5946&zoom=18&addressdetails=1",
+          "parameters": [
+            {
+              "name": "lat",
+              "description": "Latitude"
+            },
+            {
+              "name": "lon",
+              "description": "Longitude"
+            }
+          ]
+        },
+        "rate_limit": "1 request per second",
+        "notes": "Used for reverse geocoding"
+      },
+      {
+        "id": "EXT_003",
+        "name": "Overpass API",
+        "url": "https://overpass-api.de/api/interpreter",
+        "method": "POST",
+        "status": "WORKING",
+        "description": "Query OpenStreetMap data for healthcare facilities",
+        "frontend_usage": [
+          "services/location-service.ts:277-338 - fetchFromOverpassAPI()"
+        ],
+        "request": {
+          "method": "POST",
+          "body": "[out:json];(node[\"amenity\"=\"hospital\"](around:10000,12.9716,77.5946););out body;>;out skel qt;"
+        },
+        "response": {
+          "elements": [
+            {
+              "type": "node",
+              "id": 123456,
+              "lat": 12.9716,
+              "lon": 77.5946,
+              "tags": {
+                "name": "Hospital Name",
+                "amenity": "hospital",
+                "phone": "+91-80-XXXXXXXX"
+              }
+            }
+          ]
+        },
+        "rate_limit": "Unknown",
+        "notes": "Queries hospitals, clinics, and doctor offices within radius"
+      }
+    ],
+    "local_services": [
+      {
+        "id": "LOCAL_001",
+        "name": "Symptom Checker Algorithm",
+        "location": "lib/symptomChecker.ts:522-594",
+        "description": "Disease prediction based on symptoms",
+        "frontend_usage": [
+          "app/symptom-checker/page.tsx:28 - predictDisease()",
+          "components/symptom-checker-form.tsx - form submission"
+        ],
+        "input": {
+          "symptoms": ["string"],
+          "age": "number",
+          "gender": "string",
+          "duration": "number",
+          "bloodPressure": "string"
+        },
+        "output": {
+          "success": "boolean",
+          "matchedDiseases": [
+            {
+              "id": "string",
+              "name": "string",
+              "matchScore": "number",
+              "severity": "string"
+            }
+          ],
+          "severity": "mild|moderate|severe",
+          "recommendedAction": "home_care|see_doctor|emergency"
+        },
+        "notes": "Runs entirely in browser, no backend call needed"
+      },
+      {
+        "id": "LOCAL_002",
+        "name": "Hospital Search & Filtering",
+        "location": "data/hospital-service.ts",
+        "description": "Search and filter hospitals from static dataset",
+        "frontend_usage": [
+          "app/find-hospitals/page.tsx:68 - searchHospitals()"
+        ],
+        "notes": "Uses static dataset from data/hospital-locations.ts"
+      },
+      {
+        "id": "LOCAL_003",
+        "name": "Location Services",
+        "location": "services/location-service.ts",
+        "description": "Geolocation, coordinate calculations, nearby healthcare",
+        "frontend_usage": [
+          "app/find-hospitals/page.tsx - getNearbyHealthcare()",
+          "components/hospital-map.tsx - map initialization"
+        ],
+        "functions": [
+          "getCurrentLocation() - Browser geolocation API",
+          "getLocationDetails() - Nominatim reverse geocoding",
+          "searchLocations() - Nominatim search",
+          "getNearbyHealthcare() - Find nearby hospitals"
+        ]
+      }
+    ]
+  },
+  "frontend_to_backend_mapping": {
+    "pages_requiring_backend": [
+      {
+        "page": "app/find-hospitals/page.tsx",
+        "current_implementation": "Static dataset + CSV parsing",
+        "required_backend_endpoints": [
+          "GET /api/v1/hospitals - List hospitals with filters",
+          "GET /api/v1/hospitals/{id} - Get hospital details",
+          "GET /api/v1/hospitals/nearby - Get nearby hospitals by coordinates"
+        ],
+        "line_numbers": {
+          "search_call": "68-79",
+          "filter_application": "38-44"
+        }
+      },
+      {
+        "page": "app/symptom-checker/page.tsx",
+        "current_implementation": "Local algorithm (lib/symptomChecker.ts)",
+        "required_backend_endpoints": [
+          "POST /api/v1/symptoms/analyze - ML-based symptom analysis",
+          "GET /api/v1/symptoms/history - Get user's symptom history"
+        ],
+        "line_numbers": {
+          "analysis_call": "28",
+          "result_display": "86-94"
+        }
+      },
+      {
+        "page": "app/medication-reminders/page.tsx",
+        "current_implementation": "UI only, no persistence",
+        "required_backend_endpoints": [
+          "GET /api/v1/reminders - Get user's reminders",
+          "POST /api/v1/reminders - Create reminder",
+          "PUT /api/v1/reminders/{id} - Update reminder",
+          "DELETE /api/v1/reminders/{id} - Delete reminder"
+        ]
+      },
+      {
+        "page": "app/dashboard/page.tsx",
+        "current_implementation": "Stub only",
+        "required_backend_endpoints": [
+          "GET /api/v1/users/profile - Get user profile",
+          "GET /api/v1/users/health-summary - Get health dashboard data"
+        ]
+      }
+    ]
+  },
+  "missing_backend_endpoints": [
+    {
+      "endpoint": "POST /api/v1/auth/register",
+      "description": "User registration",
+      "used_by": "NONE (no signup page)"
+    },
+    {
+      "endpoint": "POST /api/v1/auth/login",
+      "description": "User login",
+      "used_by": "NONE (no login page)"
+    },
+    {
+      "endpoint": "GET /api/v1/users/profile",
+      "description": "Get user profile",
+      "used_by": "app/dashboard/page.tsx (not implemented)"
+    },
+    {
+      "endpoint": "POST /api/v1/appointments",
+      "description": "Book appointment",
+      "used_by": "NONE (no appointment booking UI)"
+    },
+    {
+      "endpoint": "GET /api/v1/doctors",
+      "description": "Get doctors list",
+      "used_by": "NONE (no find-doctors page)"
+    },
+    {
+      "endpoint": "POST /api/v1/emergency/sos",
+      "description": "Emergency SOS alert",
+      "used_by": "components/sos-button.tsx (UI only, not functional)"
+    },
+    {
+      "endpoint": "GET /api/v1/schemes",
+      "description": "Get government schemes",
+      "used_by": "app/schemes/page.tsx (uses static data)"
+    }
+  ],
+  "environment_variables_needed": {
+    "frontend": [
+      {
+        "name": "NEXT_PUBLIC_API_URL",
+        "description": "Backend API base URL",
+        "example": "http://localhost:5000 (dev) or https://api.arogya.com (prod)"
+      },
+      {
+        "name": "NEXT_PUBLIC_NOMINATIM_API",
+        "description": "OpenStreetMap Nominatim API URL",
+        "example": "https://nominatim.openstreetmap.org"
+      }
+    ],
+    "backend": [
+      {
+        "name": "DATABASE_URL",
+        "description": "PostgreSQL connection string",
+        "example": "postgresql://user:password@localhost:5432/arogya"
+      },
+      {
+        "name": "REDIS_URL",
+        "description": "Redis connection string",
+        "example": "redis://localhost:6379"
+      },
+      {
+        "name": "JWT_SECRET",
+        "description": "JWT signing secret",
+        "example": "your-secret-key-here"
+      },
+      {
+        "name": "ML_MODEL_PATH",
+        "description": "Path to ML symptom analysis model",
+        "example": "./models/symptom_classifier.pkl"
+      }
+    ]
+  }
+}

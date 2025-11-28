@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AROGYA Healthcare{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <svg class="h-8 w-8 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                    </svg>
+                    <h1 class="text-2xl font-bold text-purple-700">AROGYA</h1>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="md:hidden p-2">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-6">
+                    <a href="/" class="text-gray-700 hover:text-purple-700">Home</a>
+                    <a href="/find-hospitals" class="text-gray-700 hover:text-purple-700">Find Hospitals</a>
+                    <a href="/symptom-checker" class="text-gray-700 hover:text-purple-700">Symptom Checker</a>
+                    <a href="/schemes" class="text-gray-700 hover:text-purple-700">Schemes</a>
+                    <a href="/dashboard" class="text-gray-700 hover:text-purple-700">Dashboard</a>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4">
+                <div class="flex flex-col space-y-2">
+                    <a href="/" class="text-gray-700 hover:text-purple-700 py-2">Home</a>
+                    <a href="/find-hospitals" class="text-gray-700 hover:text-purple-700 py-2">Find Hospitals</a>
+                    <a href="/symptom-checker" class="text-gray-700 hover:text-purple-700 py-2">Symptom Checker</a>
+                    <a href="/schemes" class="text-gray-700 hover:text-purple-700 py-2">Schemes</a>
+                    <a href="/dashboard" class="text-gray-700 hover:text-purple-700 py-2">Dashboard</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <svg class="h-6 w-6 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                        </svg>
+                        <h3 class="text-xl font-bold">AROGYA Healthcare</h3>
+                    </div>
+                    <p class="text-gray-400">Connecting rural communities to healthcare</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">Quick Links</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="/symptom-checker" class="text-gray-400 hover:text-white">Symptom Checker</a>
+                        <a href="/find-hospitals" class="text-gray-400 hover:text-white">Find Hospitals</a>
+                        <a href="/health-articles" class="text-gray-400 hover:text-white">Health Articles</a>
+                        <a href="/schemes" class="text-gray-400 hover:text-white">Government Schemes</a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 AROGYA Healthcare. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        // API helper function
+        async function fetchAPI(endpoint) {
+            try {
+                const response = await fetch(`http://localhost:5000${endpoint}`);
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return null;
+            }
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add any page-specific JavaScript here
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

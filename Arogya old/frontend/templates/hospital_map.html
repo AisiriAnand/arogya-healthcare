@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Map - AROGYA Healthcare{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Hospital Map</h1>
+        <p class="text-gray-600">Find hospitals near you on an interactive map</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="mb-4">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="locationInput" placeholder="Enter your location" 
+                       class="flex-1 border rounded-lg p-2">
+                <button onclick="searchLocation()" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition">
+                    Search Location
+                </button>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map" class="bg-gray-100 rounded-lg h-96 flex items-center justify-center">
+            <div class="text-center">
+                <svg class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <p class="text-gray-600">Interactive map will load here</p>
+                <p class="text-sm text-gray-500">Enter your location to find nearby hospitals</p>
+            </div>
+        </div>
+
+        <!-- Hospital List -->
+        <div class="mt-6">
+            <h2 class="text-xl font-bold mb-4">Nearby Hospitals</h2>
+            <div id="hospitalList" class="space-y-4">
+                <!-- Hospitals will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Mock map functionality
+function searchLocation() {
+    const location = document.getElementById('locationInput').value;
+    if (!location) {
+        alert('Please enter a location');
+        return;
+    }
+    
+    // Show loading state
+    const mapDiv = document.getElementById('map');
+    mapDiv.innerHTML = `
+        <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            <p class="mt-4 text-gray-600">Finding hospitals near ${location}...</p>
+        </div>
+    `;
+    
+    // Simulate loading and show results
+    setTimeout(() => {
+        mapDiv.innerHTML = `
+            <div class="relative h-full bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-4">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="bg-white rounded-lg p-4 shadow-lg">
+                            <p class="font-semibold text-gray-900">📍 ${location}</p>
+                            <p class="text-sm text-gray-600">2 hospitals found nearby</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Mock hospital markers -->
+                <div class="absolute top-4 left-4 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">H1</div>
+                <div class="absolute top-16 right-8 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">H2</div>
+                <div class="absolute bottom-8 left-12 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold">H3</div>
+            </div>
+        `;
+        loadNearbyHospitals();
+    }, 2000);
+}
+
+async function loadNearbyHospitals() {
+    try {
+        const response = await fetch('/api/hospitals');
+        const hospitals = await response.json();
+        
+        const hospitalList = document.getElementById('hospitalList');
+        hospitalList.innerHTML = hospitals.map(hospital => `
+            <div class="border rounded-lg p-4 hover:shadow-md transition">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-bold text-gray-900">${hospital.name}</h3>
+                        <p class="text-gray-600">${hospital.address}</p>
+                        <p class="text-sm text-gray-500">📞 ${hospital.phone}</p>
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            ${hospital.services.map(service => `
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">${service}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="flex items-center">
+                            <span class="text-yellow-500">⭐</span>
+                            <span class="ml-1 font-semibold">${hospital.rating}</span>
+                        </div>
+                        <button onclick="getDirections('${hospital.address}')" class="mt-2 bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700">
+                            Directions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading hospitals:', error);
+    }
+}
+
+function getDirections(address) {
+    window.open(`https://maps.google.com/?q=${encodeURIComponent(address)}`, '_blank');
+}
+
+// Load initial hospitals
+document.addEventListener('DOMContentLoaded', function() {
+    loadNearbyHospitals();
+});
+</script>
+{% endblock %}

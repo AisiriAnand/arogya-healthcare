@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Health Articles - AROGYA Healthcare{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Health Articles</h1>
+        <p class="text-gray-600">Read latest health articles and medical information</p>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <div class="grid md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+                <input type="text" id="searchInput" placeholder="Search articles..." 
+                       class="w-full border rounded-lg p-2" onkeyup="filterArticles()">
+            </div>
+            <div>
+                <select id="categoryFilter" class="w-full border rounded-lg p-2" onchange="filterArticles()">
+                    <option value="">All Categories</option>
+                    <option value="Chronic Diseases">Chronic Diseases</option>
+                    <option value="Wellness">Wellness</option>
+                    <option value="Prevention">Prevention</option>
+                    <option value="Nutrition">Nutrition</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Articles Grid -->
+    <div id="articlesGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Articles will be loaded here -->
+    </div>
+
+    <!-- Article Detail Modal -->
+    <div id="articleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 id="modalTitle" class="text-2xl font-bold text-gray-900"></h2>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="modalContent" class="prose max-w-none">
+                    <!-- Article content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let articles = [];
+
+// Load articles on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadArticles();
+});
+
+async function loadArticles() {
+    try {
+        const response = await fetch('/api/articles');
+        articles = await response.json();
+        
+        // Add some additional sample articles
+        articles = [
+            ...articles,
+            {
+                "id": 3,
+                "title": "Healthy Eating Habits",
+                "category": "Nutrition",
+                "content": "Eating a balanced diet is essential for maintaining good health. Include plenty of fruits, vegetables, whole grains, and lean proteins in your daily meals. Limit processed foods, sugar, and saturated fats. Remember to stay hydrated by drinking plenty of water throughout the day.",
+                "author": "Nutrition Expert",
+                "date": "2024-01-25"
+            },
+            {
+                "id": 4,
+                "title": "Preventing Heart Disease",
+                "category": "Prevention",
+                "content": "Heart disease is a leading cause of death, but it's often preventable. Key prevention strategies include maintaining a healthy weight, exercising regularly, eating a heart-healthy diet, not smoking, and managing stress. Regular check-ups with your doctor can help catch problems early.",
+                "author": "Cardiologist",
+                "date": "2024-01-22"
+            },
+            {
+                "id": 5,
+                "title": "Mental Health Awareness",
+                "category": "Wellness",
+                "content": "Mental health is just as important as physical health. Practice self-care, seek support when needed, and reduce stigma around mental health issues. Common mental health conditions include depression, anxiety, and stress. Treatment options include therapy, medication, and lifestyle changes.",
+                "author": "Mental Health Professional",
+                "date": "2024-01-18"
+            }
+        ];
+        
+        displayArticles(articles);
+    } catch (error) {
+        console.error('Error loading articles:', error);
+    }
+}
+
+function displayArticles(articlesToShow) {
+    const articlesGrid = document.getElementById('articlesGrid');
+    
+    if (articlesToShow.length === 0) {
+        articlesGrid.innerHTML = `
+            <div class="col-span-full text-center py-12">
+                <svg class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                <p class="text-gray-600">No articles found</p>
+                <p class="text-sm text-gray-500">Try adjusting your search or filter criteria</p>
+            </div>
+        `;
+        return;
+    }
+    
+    articlesGrid.innerHTML = articlesToShow.map(article => `
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden card-hover cursor-pointer" onclick="openArticle(${article.id})">
+            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 h-2"></div>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-medium">
+                        ${article.category}
+                    </span>
+                    <span class="text-sm text-gray-500">${formatDate(article.date)}</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">${article.title}</h3>
+                <p class="text-gray-600 mb-4 line-clamp-3">${article.content.substring(0, 150)}...</p>
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-gray-500">By ${article.author}</p>
+                    <button class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                        Read More →
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterArticles() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const category = document.getElementById('categoryFilter').value;
+    
+    const filtered = articles.filter(article => {
+        const matchesSearch = article.title.toLowerCase().includes(searchTerm) || 
+                             article.content.toLowerCase().includes(searchTerm) ||
+                             article.author.toLowerCase().includes(searchTerm);
+        const matchesCategory = !category || article.category === category;
+        
+        return matchesSearch && matchesCategory;
+    });
+    
+    displayArticles(filtered);
+}
+
+function openArticle(id) {
+    const article = articles.find(a => a.id === id);
+    if (!article) return;
+    
+    document.getElementById('modalTitle').textContent = article.title;
+    document.getElementById('modalContent').innerHTML = `
+        <div class="space-y-4">
+            <div class="flex items-center justify-between text-sm text-gray-600">
+                <span>By ${article.author}</span>
+                <span>${formatDate(article.date)}</span>
+            </div>
+            <div class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full inline-block">
+                ${article.category}
+            </div>
+            <div class="prose max-w-none">
+                <p class="text-gray-700 leading-relaxed">${article.content}</p>
+            </div>
+            <div class="border-t pt-4 mt-6">
+                <h3 class="font-semibold text-gray-900 mb-2">Key Points:</h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Important health information</li>
+                    <li>Expert advice and recommendations</li>
+                    <li>Practical tips for daily life</li>
+                </ul>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-800">
+                    <strong>Medical Disclaimer:</strong> This article is for informational purposes only. Always consult with a healthcare professional for medical advice.
+                </p>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('articleModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('articleModal').classList.add('hidden');
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+}
+
+// Close modal when clicking outside
+document.getElementById('articleModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+</script>
+{% endblock %}

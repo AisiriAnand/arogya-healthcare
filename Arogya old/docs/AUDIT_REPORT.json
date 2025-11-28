@@ -1,0 +1,406 @@
+{
+  "project_name": "AROGYA - Rural Healthcare Platform",
+  "audit_timestamp": "2025-11-27T09:00:00Z",
+  "project_status": "FRONTEND_HEAVY_MINIMAL_BACKEND",
+  "tech_stack": {
+    "frontend": {
+      "framework": "Next.js",
+      "version": "16.0.5",
+      "language": "TypeScript",
+      "typescript_version": "^5",
+      "react_version": "^19",
+      "styling": "Tailwind CSS 3.4.17",
+      "ui_library": "Radix UI (50+ components)",
+      "animations": "Framer Motion",
+      "forms": "React Hook Form + Zod validation",
+      "icons": "Lucide React 0.454.0",
+      "charts": "Recharts 2.15.0",
+      "maps": "Leaflet (dynamic import, online only)"
+    },
+    "backend": {
+      "framework": "Express.js",
+      "status": "MINIMAL_MOCK_ONLY",
+      "endpoints": 3,
+      "database": "NONE",
+      "authentication": "NONE"
+    },
+    "external_apis": [
+      "OpenStreetMap Nominatim (location search & reverse geocoding)",
+      "Overpass API (healthcare facility discovery)"
+    ],
+    "package_manager": "npm",
+    "node_version_required": "18+ (inferred from Next.js 16)"
+  },
+  "directory_structure": {
+    "root_level_issues": [
+      "MESSY: Frontend and backend mixed at root level",
+      "MESSY: No clear separation of concerns",
+      "MESSY: Backend server.js at /backend/ but not integrated with Next.js",
+      "MESSY: Multiple config files at root (next.config.mjs, tsconfig.json, tailwind.config.js, postcss.config.mjs)"
+    ],
+    "current_structure": {
+      "app/": "Next.js App Router pages (23 items)",
+      "components/": "React components (67 items, mostly UI)",
+      "contexts/": "React contexts (1 file: language-context.tsx - 45KB)",
+      "hooks/": "Custom React hooks (4 files)",
+      "services/": "Business logic (2 files: location-service.ts, symptom-checker-service.ts)",
+      "data/": "Static datasets (4 files: hospital-locations.ts, schemes-data.ts, hospital-service.ts)",
+      "lib/": "Core algorithms (2 files: symptomChecker.ts, unknown)",
+      "types/": "TypeScript definitions (2 files)",
+      "public/": "Static assets (9 items)",
+      "backend/": "Express server (3 items: server.js, package.json, package-lock.json)",
+      "styles/": "Global styles (1 file)",
+      ".next/": "Next.js build output (SHOULD NOT BE IN REPO)"
+    },
+    "recommended_structure": {
+      "frontend/": {
+        "app/": "Next.js App Router",
+        "components/": "React components",
+        "contexts/": "React contexts",
+        "hooks/": "Custom hooks",
+        "services/": "Frontend services (API calls, utilities)",
+        "lib/": "Frontend utilities",
+        "types/": "TypeScript types",
+        "public/": "Static assets",
+        "styles/": "Global styles",
+        "package.json": "Frontend dependencies",
+        "tsconfig.json": "Frontend TypeScript config",
+        "next.config.mjs": "Next.js config",
+        "tailwind.config.js": "Tailwind config",
+        "postcss.config.mjs": "PostCSS config"
+      },
+      "backend-python/": {
+        "app/": "FastAPI application",
+        "models/": "SQLAlchemy ORM models",
+        "schemas/": "Pydantic request/response schemas",
+        "routes/": "API route handlers",
+        "services/": "Business logic",
+        "ml/": "ML models and utilities",
+        "utils/": "Helper functions",
+        "config.py": "Configuration",
+        "main.py": "Entry point",
+        "requirements.txt": "Python dependencies",
+        "pyproject.toml": "Python project config"
+      },
+      "docs/": "Documentation and specs",
+      "scripts/": "Migration and setup scripts",
+      ".github/": "GitHub workflows"
+    }
+  },
+  "frontend_inventory": {
+    "pages": {
+      "app/page.tsx": {
+        "size_bytes": 19231,
+        "status": "FULLY_FUNCTIONAL",
+        "description": "Homepage with hero, features, CTA sections",
+        "api_calls": "NONE (static content)"
+      },
+      "app/symptom-checker/page.tsx": {
+        "size_bytes": 5500,
+        "status": "FULLY_FUNCTIONAL",
+        "description": "Symptom analysis interface",
+        "api_calls": "LOCAL_ONLY (lib/symptomChecker.ts)"
+      },
+      "app/find-hospitals/page.tsx": {
+        "size_bytes": 7200,
+        "status": "PARTIALLY_FUNCTIONAL",
+        "description": "Hospital search with filters and map",
+        "api_calls": [
+          "GET /api/hospitals (CSV parsing, Next.js API route)",
+          "Leaflet maps (online only)"
+        ]
+      },
+      "app/schemes/page.tsx": {
+        "status": "FULLY_FUNCTIONAL",
+        "description": "Government schemes display",
+        "api_calls": "NONE (static data)"
+      },
+      "app/health-articles/page.tsx": {
+        "status": "FULLY_FUNCTIONAL",
+        "description": "Health articles listing",
+        "api_calls": "NONE (static data)"
+      },
+      "app/diet-plans/page.tsx": {
+        "status": "PARTIALLY_FUNCTIONAL",
+        "description": "Diet plan templates",
+        "api_calls": "NONE (UI only)"
+      },
+      "app/medication-reminders/page.tsx": {
+        "status": "PARTIALLY_FUNCTIONAL",
+        "description": "Medication reminder UI",
+        "api_calls": "NONE (UI only, no persistence)"
+      },
+      "app/hospital-map/page.tsx": {
+        "status": "PARTIALLY_FUNCTIONAL",
+        "description": "Interactive hospital map",
+        "api_calls": "Leaflet maps (online only)"
+      },
+      "app/dashboard/page.tsx": {
+        "status": "MINIMAL",
+        "description": "User dashboard stub",
+        "api_calls": "NONE"
+      }
+    },
+    "api_routes": {
+      "app/api/hospitals/route.ts": {
+        "size_bytes": 4900,
+        "status": "WORKING",
+        "methods": ["GET"],
+        "description": "Parse CSV hospital data from public/data/",
+        "parameters": ["type", "state", "query"],
+        "csv_files_required": [
+          "public/data/AYUSHHospitals.csv",
+          "public/data/Employees State Insurance Corporation.csv",
+          "public/data/Hospitals and Beds maintained by Ministry of Defence.csv",
+          "public/data/Hospitals and beds maintained by Railways.csv"
+        ],
+        "issue": "CSV files not found in repo - endpoint will fail"
+      },
+      "app/api/location/route.ts": {
+        "size_bytes": 2100,
+        "status": "WORKING",
+        "methods": ["GET", "POST"],
+        "description": "Proxy to OpenStreetMap Nominatim API",
+        "endpoints": [
+          "GET ?query=location_name - Search locations",
+          "POST {latitude, longitude} - Reverse geocoding"
+        ]
+      }
+    },
+    "components_summary": {
+      "total_components": 67,
+      "ui_components": 50,
+      "custom_components": 17,
+      "key_custom_components": [
+        "hospital-card.tsx (8.9KB)",
+        "hospital-filters.tsx (15.5KB)",
+        "hospital-map.tsx (15KB)",
+        "sos-button.tsx (51KB - VERY LARGE)",
+        "symptom-checker-form.tsx (13.6KB)",
+        "symptom-result.tsx (12.1KB)",
+        "india-hospital-map.tsx (21.4KB)",
+        "offline-notification.tsx (4.7KB)"
+      ]
+    }
+  },
+  "backend_inventory": {
+    "current_backend": {
+      "location": "/backend/",
+      "framework": "Express.js",
+      "status": "MINIMAL_MOCK_ONLY",
+      "endpoints": [
+        {
+          "path": "/api/health",
+          "method": "GET",
+          "description": "Health check",
+          "response": "{ status: 'Backend server is running' }"
+        },
+        {
+          "path": "/api/doctors",
+          "method": "GET",
+          "description": "Mock doctor data",
+          "response": "Array of 3 hardcoded doctors"
+        },
+        {
+          "path": "/api/articles",
+          "method": "GET",
+          "description": "Mock health articles",
+          "response": "Array of 2 hardcoded articles"
+        },
+        {
+          "path": "/api/reminders",
+          "method": "GET",
+          "description": "Mock medication reminders",
+          "response": "Array of 1 hardcoded reminder"
+        }
+      ],
+      "database": "NONE",
+      "authentication": "NONE",
+      "port": 5000,
+      "cors_enabled": true
+    },
+    "missing_backend_features": [
+      "User authentication & authorization",
+      "Database integration",
+      "Real hospital data API",
+      "Real doctor data API",
+      "Appointment booking",
+      "Medication reminder persistence",
+      "User profile management",
+      "Medical history storage",
+      "Emergency SOS routing",
+      "Notification system",
+      "ML symptom analysis backend"
+    ]
+  },
+  "data_sources": {
+    "static_datasets": [
+      {
+        "file": "data/hospital-locations.ts",
+        "size_bytes": 13643,
+        "content": "15+ hospitals with coordinates, specialties, ratings"
+      },
+      {
+        "file": "data/schemes-data.ts",
+        "size_bytes": 8685,
+        "content": "8 government healthcare schemes with eligibility, benefits"
+      },
+      {
+        "file": "data/schemes-data.tsx",
+        "size_bytes": 8895,
+        "content": "Duplicate of schemes-data.ts with React components"
+      },
+      {
+        "file": "services/symptom-checker-service.ts",
+        "size_bytes": 33419,
+        "content": "30+ diseases with symptoms, severity, recommendations"
+      },
+      {
+        "file": "services/location-service.ts",
+        "size_bytes": 11470,
+        "content": "15+ hospitals with coordinates for fallback"
+      }
+    ],
+    "external_apis": [
+      {
+        "name": "OpenStreetMap Nominatim",
+        "usage": "Location search & reverse geocoding",
+        "endpoint": "https://nominatim.openstreetmap.org/",
+        "rate_limit": "1 request/second",
+        "status": "WORKING"
+      },
+      {
+        "name": "Overpass API",
+        "usage": "Healthcare facility discovery",
+        "endpoint": "https://overpass-api.de/api/interpreter",
+        "rate_limit": "Unknown",
+        "status": "WORKING"
+      }
+    ],
+    "missing_csv_files": [
+      "public/data/AYUSHHospitals.csv",
+      "public/data/Employees State Insurance Corporation.csv",
+      "public/data/Hospitals and Beds maintained by Ministry of Defence.csv",
+      "public/data/Hospitals and beds maintained by Railways.csv"
+    ]
+  },
+  "typescript_issues": {
+    "status": "MOSTLY_WORKING_WITH_WARNINGS",
+    "issues": [
+      {
+        "severity": "MEDIUM",
+        "issue": "tsconfig.json paths use '@/*' pointing to root",
+        "current": "\"@/*\": [\"./*\"]",
+        "impact": "Will break after reorganization",
+        "fix": "Update to \"@/*\": [\"./frontend/*\"] after migration"
+      },
+      {
+        "severity": "LOW",
+        "issue": "next.config.mjs ignores TypeScript errors",
+        "current": "typescript: { ignoreBuildErrors: true }",
+        "impact": "Hides potential type issues",
+        "fix": "Enable strict type checking in production"
+      },
+      {
+        "severity": "LOW",
+        "issue": "Some dependencies use 'latest' version",
+        "packages": ["@emotion/is-prop-valid", "date-fns", "framer-motion", "fs", "path", "papaparse"],
+        "impact": "Unpredictable updates",
+        "fix": "Pin to specific versions"
+      }
+    ]
+  },
+  "environment_files": {
+    "status": "MISSING",
+    "required_files": [
+      ".env.local (frontend environment variables)",
+      ".env.example (template for developers)",
+      "backend/.env (backend configuration)"
+    ],
+    "note": "Files are likely gitignored - check .gitignore"
+  },
+  "build_and_deployment": {
+    "frontend": {
+      "build_command": "next build",
+      "dev_command": "next dev",
+      "start_command": "next start",
+      "build_output": ".next/",
+      "status": "WORKING"
+    },
+    "backend": {
+      "start_command": "node server.js",
+      "dev_command": "node server.js",
+      "status": "WORKING_BUT_MINIMAL"
+    },
+    "issues": [
+      ".next/ directory should NOT be in version control",
+      "No Docker configuration",
+      "No CI/CD pipeline",
+      "No production deployment configuration"
+    ]
+  },
+  "dependencies_summary": {
+    "frontend_dependencies": 65,
+    "frontend_devDependencies": 4,
+    "backend_dependencies": 3,
+    "total_npm_packages": "290+ (including node_modules)"
+  },
+  "recommendations": {
+    "immediate_actions": [
+      "1. Reorganize repo into frontend/ and backend-python/ directories",
+      "2. Fix missing CSV files for hospital API endpoint",
+      "3. Add .env files and environment configuration",
+      "4. Create proper .gitignore (exclude .next/, node_modules/, __pycache__/)",
+      "5. Pin all 'latest' dependencies to specific versions"
+    ],
+    "architecture_changes": [
+      "1. Replace Express backend with FastAPI",
+      "2. Add PostgreSQL database",
+      "3. Implement JWT authentication",
+      "4. Add Redis for caching and sessions",
+      "5. Implement ML model for symptom analysis",
+      "6. Add proper error handling and logging"
+    ],
+    "code_quality": [
+      "1. Enable strict TypeScript checking",
+      "2. Add ESLint and Prettier",
+      "3. Add unit tests (Jest for frontend, pytest for backend)",
+      "4. Add integration tests",
+      "5. Add API documentation (OpenAPI/Swagger)"
+    ]
+  },
+  "file_mapping_for_reorganization": {
+    "frontend_mapping": {
+      "app/": "frontend/app/",
+      "components/": "frontend/components/",
+      "contexts/": "frontend/contexts/",
+      "hooks/": "frontend/hooks/",
+      "services/": "frontend/services/",
+      "data/": "frontend/data/",
+      "lib/": "frontend/lib/",
+      "types/": "frontend/types/",
+      "public/": "frontend/public/",
+      "styles/": "frontend/styles/",
+      "package.json": "frontend/package.json",
+      "tsconfig.json": "frontend/tsconfig.json",
+      "next.config.mjs": "frontend/next.config.mjs",
+      "tailwind.config.js": "frontend/tailwind.config.js",
+      "postcss.config.mjs": "frontend/postcss.config.mjs",
+      "components.json": "frontend/components.json"
+    },
+    "backend_mapping": {
+      "backend/server.js": "backend-python/legacy_express_server.js (for reference only)",
+      "backend/package.json": "backend-python/legacy_package.json (for reference only)"
+    },
+    "root_level_artifacts": [
+      "AUDIT_REPORT.json",
+      "API_ENDPOINTS.json",
+      "ARCHITECTURE.md",
+      "API_SPEC.json",
+      "MIGRATION_GUIDE.md",
+      "README.md",
+      ".gitignore",
+      ".env.example"
+    ]
+  }
+}

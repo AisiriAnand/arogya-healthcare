@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AROGYA Healthcare{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p class="text-gray-600">Your healthcare overview</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Health Score</p>
+                    <p class="text-2xl font-bold text-green-600">85%</p>
+                </div>
+                <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Appointments</p>
+                    <p class="text-2xl font-bold text-blue-600">2</p>
+                </div>
+                <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Medications</p>
+                    <p class="text-2xl font-bold text-purple-600">3</p>
+                </div>
+                <svg class="h-8 w-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Reminders</p>
+                    <p class="text-2xl font-bold text-orange-600">5</p>
+                </div>
+                <svg class="h-8 w-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <a href="/symptom-checker" class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg p-6 text-white card-hover">
+            <svg class="h-8 w-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h3 class="font-semibold">Check Symptoms</h3>
+            <p class="text-purple-100 text-sm">AI-powered analysis</p>
+        </a>
+
+        <a href="/find-hospitals" class="bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg p-6 text-white card-hover">
+            <svg class="h-8 w-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <h3 class="font-semibold">Find Hospitals</h3>
+            <p class="text-pink-100 text-sm">Nearby facilities</p>
+        </a>
+
+        <a href="/medication-reminders" class="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg p-6 text-white card-hover">
+            <svg class="h-8 w-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="font-semibold">Medication</h3>
+            <p class="text-cyan-100 text-sm">Set reminders</p>
+        </a>
+
+        <a href="/health-articles" class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg p-6 text-white card-hover">
+            <svg class="h-8 w-8 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            <h3 class="font-semibold">Health Articles</h3>
+            <p class="text-emerald-100 text-sm">Learn more</p>
+        </a>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+        <div class="space-y-4">
+            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <div class="bg-blue-100 rounded-full p-2">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold">Symptom Check Completed</p>
+                    <p class="text-sm text-gray-600">You checked symptoms for headache and fever</p>
+                </div>
+                <span class="text-sm text-gray-500">2 hours ago</span>
+            </div>
+
+            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <div class="bg-green-100 rounded-full p-2">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold">Medication Taken</p>
+                    <p class="text-sm text-gray-600">Aspirin 100mg - Morning dose</p>
+                </div>
+                <span class="text-sm text-gray-500">4 hours ago</span>
+            </div>
+
+            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <div class="bg-purple-100 rounded-full p-2">
+                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="font-semibold">Hospital Searched</p>
+                    <p class="text-sm text-gray-600">Viewed nearby hospitals in your area</p>
+                </div>
+                <span class="text-sm text-gray-500">1 day ago</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Tips -->
+    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Today's Health Tip</h2>
+        <div class="flex items-start space-x-4">
+            <div class="bg-purple-100 rounded-full p-2">
+                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-900">Stay Hydrated</p>
+                <p class="text-gray-600">Drink at least 8 glasses of water daily to maintain good health and prevent dehydration.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
