@@ -8,15 +8,15 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 # Environment configuration
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_API_URL = os.getenv("GEMINI_API_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyAwdtypJdvhP4MsnfX4bjQpMjtnSgAtv5g")  # Fallback for testing
+GEMINI_API_URL = os.getenv("GEMINI_API_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent")
 
 # Cache configuration
-CACHE_FILE = Path("symptom_cache.json")
+CACHE_FILE = Path("symptom_checker/symptom_cache.json")
 CACHE_DURATION = timedelta(hours=24)
 
 # Logging
-LOG_FILE = Path("symptom_requests.log")
+LOG_FILE = Path("symptom_checker/symptom_requests.log")
 
 class SymptomCheckerService:
     def __init__(self):
