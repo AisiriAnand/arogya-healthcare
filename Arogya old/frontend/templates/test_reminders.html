@@ -77,7 +77,7 @@ document.getElementById('reminderForm').addEventListener('submit', async functio
         medication_name: formData.get('medication'),
         dosage: formData.get('dosage'),
         frequency: formData.get('frequency'),
-        reminder_times: [formData.get('time') + ':00'],
+        reminder_times: [formData.get('time')],
         start_date: formData.get('startDate'),
         ringtone: "default"
     };

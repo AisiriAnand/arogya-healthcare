@@ -20,5 +20,47 @@
     "total_doses": 0,
     "taken_doses": 0,
     "missed_doses": 0
+  },
+  "db999b70-a5ef-4eac-b49b-7d7feaa1bae9": {
+    "id": "db999b70-a5ef-4eac-b49b-7d7feaa1bae9",
+    "user_id": "demo_user_123",
+    "medication_name": "Paracetamol",
+    "dosage": "500mg",
+    "frequency": "daily",
+    "reminder_times": [
+      "09:00:00"
+    ],
+    "start_date": "2025-11-29",
+    "end_date": null,
+    "ringtone": "default",
+    "notes": "For headache",
+    "status": "active",
+    "created_at": "2025-11-29 21:14:43.072803",
+    "updated_at": "2025-11-29 21:14:43.072803",
+    "next_dose_time": null,
+    "total_doses": 0,
+    "taken_doses": 0,
+    "missed_doses": 0
+  },
+  "2b765cad-b78f-4929-a21a-c2678623f096": {
+    "id": "2b765cad-b78f-4929-a21a-c2678623f096",
+    "user_id": "demo_user_123",
+    "medication_name": "Test Medicine",
+    "dosage": "200mg",
+    "frequency": "daily",
+    "reminder_times": [
+      "10:00:00"
+    ],
+    "start_date": "2025-11-29",
+    "end_date": null,
+    "ringtone": "default",
+    "notes": null,
+    "status": "active",
+    "created_at": "2025-11-29 21:15:29.210972",
+    "updated_at": "2025-11-29 21:15:29.210972",
+    "next_dose_time": null,
+    "total_doses": 0,
+    "taken_doses": 0,
+    "missed_doses": 0
   }
 }
