@@ -7,6 +7,13 @@ from datetime import timedelta, datetime
 from pathlib import Path
 from typing import Dict, List, Any
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not available, use system env vars
+
 # Environment configuration
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")  # NO FALLBACK - MUST BE SET VIA ENVIRONMENT
 GEMINI_API_URL = os.getenv("GEMINI_API_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent")
