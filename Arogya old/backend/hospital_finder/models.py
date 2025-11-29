@@ -22,6 +22,9 @@ class Hospital(BaseModel):
     latitude: float
     longitude: float
     distance_km: Optional[float] = None
+    town: Optional[str] = None
+    subtown: Optional[str] = None
+    village: Optional[str] = None
 
 class HospitalSearchResponse(BaseModel):
     hospitals: List[Hospital]

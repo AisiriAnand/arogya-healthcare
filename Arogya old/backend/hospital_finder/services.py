@@ -41,7 +41,10 @@ class HospitalFinderService:
                     specialties=specialties,
                     facilities=facilities,
                     latitude=lat,
-                    longitude=lon
+                    longitude=lon,
+                    town=str(row.get('Town', '')),
+                    subtown=str(row.get('Subtown', '')),
+                    village=str(row.get('Village', ''))
                 )
                 
                 self.hospitals.append(hospital)
@@ -130,45 +133,81 @@ class HospitalFinderService:
         return results
     
     def search_by_location_name(self, query: str) -> List[Hospital]:
-        """Search hospitals by location name"""
-        query = query.lower()
+        """Search hospitals by location name - improved to work for any city in India"""
+        query = query.lower().strip()
         results = []
         
-        # Find matching locations first
-        matching_locations = [
-            loc for loc in self.locations 
-            if query in loc.name.lower() or 
-               query in loc.district.lower() or 
-               query in loc.state.lower()
-        ]
-        
-        if matching_locations:
-            # Use the first matching location as center
-            center = matching_locations[0]
-            return self.search_by_radius(center.latitude, center.longitude, 50)  # 50km radius
-        
-        # If no location match, search hospital names and addresses
+        # First, try to find exact matches in hospital locations
+        location_matches = []
         for hospital in self.hospitals:
+            # Check if query matches hospital's location details
             if (query in hospital.name.lower() or 
                 query in hospital.address.lower() or
                 query in hospital.district.lower() or
-                query in hospital.state.lower()):
-                results.append(hospital)
+                query in hospital.state.lower() or
+                query in getattr(hospital, 'town', '').lower() or
+                query in getattr(hospital, 'subtown', '').lower() or
+                query in getattr(hospital, 'village', '').lower()):
+                location_matches.append(hospital)
         
-        return results
+        if location_matches:
+            # Sort by relevance and return
+            location_matches.sort(key=lambda h: (
+                query in h.name.lower(),  # Prioritize name matches
+                query in h.district.lower(),  # Then district matches
+                query in h.state.lower()  # Then state matches
+            ), reverse=True)
+            return location_matches[:50]  # Return top 50 results
+        
+        # If no direct matches, try fuzzy matching with common city names
+        common_cities = {
+            'bangalore': 'karnataka',
+            'bengaluru': 'karnataka', 
+            'mandya': 'karnataka',
+            'kolar': 'karnataka',
+            'agra': 'uttar pradesh',
+            'delhi': 'delhi',
+            'new delhi': 'delhi',
+            'mumbai': 'maharashtra',
+            'pune': 'maharashtra',
+            'chennai': 'tamil nadu',
+            'hyderabad': 'telangana',
+            'kolkata': 'west bengal'
+        }
+        
+        # Check if query matches known cities
+        if query in common_cities:
+            state = common_cities[query]
+            state_hospitals = [h for h in self.hospitals if h.state.lower() == state]
+            return state_hospitals[:50]
+        
+        # Fallback: return hospitals from matching state
+        state_matches = [h for h in self.hospitals if query in h.state.lower()]
+        if state_matches:
+            return state_matches[:50]
+        
+        return []
     
     def filter_by_category(self, hospitals: List[Hospital], categories: List[str]) -> List[Hospital]:
-        """Filter hospitals by category"""
-        if not categories:
+        """Filter hospitals by category - improved filtering"""
+        if not categories or (len(categories) == 1 and categories[0] == ''):
             return hospitals
         
         filtered = []
         for hospital in hospitals:
             for category in categories:
-                category_lower = category.lower()
+                category_lower = category.lower().strip()
+                
+                # Enhanced category matching
                 if (category_lower in hospital.category.lower() or
                     category_lower in hospital.care_type.lower() or
-                    category_lower in ' '.join(hospital.specialties).lower()):
+                    any(category_lower in specialty.lower() for specialty in hospital.specialties) or
+                    category_lower in ' '.join(hospital.specialties).lower() or
+                    # Common category mappings
+                    (category_lower == 'government' and 'government' in hospital.category.lower()) or
+                    (category_lower == 'private' and 'private' in hospital.category.lower()) or
+                    (category_lower == 'multi' and 'multi' in hospital.category.lower()) or
+                    (category_lower == 'emergency' and 'emergency' in hospital.facilities.lower())):
                     filtered.append(hospital)
                     break
         
