@@ -1,0 +1,12 @@
+{
+  "demo_user_123": {
+    "user_id": "demo_user_123",
+    "enable_notifications": true,
+    "sound_enabled": true,
+    "vibration_enabled": true,
+    "reminder_advance_minutes": 5,
+    "quiet_hours_enabled": false,
+    "quiet_hours_start": null,
+    "quiet_hours_end": null
+  }
+}

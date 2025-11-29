@@ -5,12 +5,14 @@ import os
 # Import feature routers
 from hospital_finder.router import router as hospital_router
 from symptom_checker.router import router as symptom_router
+from medication_reminders.router import router as medication_router
 
 app = FastAPI(title="AROGYA Healthcare Backend", version="2.0.0")
 
 # Include feature routers
 app.include_router(hospital_router)
 app.include_router(symptom_router)
+app.include_router(medication_router)
 
 # CORS middleware
 app.add_middleware(

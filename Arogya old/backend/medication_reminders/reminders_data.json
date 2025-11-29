@@ -1,0 +1,24 @@
+{
+  "4d205331-4101-44bf-9058-ecd3b1edd5a4": {
+    "id": "4d205331-4101-44bf-9058-ecd3b1edd5a4",
+    "user_id": "demo_user_123",
+    "medication_name": "Aspirin",
+    "dosage": "100mg",
+    "frequency": "daily",
+    "reminder_times": [
+      "08:00:00",
+      "20:00:00"
+    ],
+    "start_date": "2025-11-29",
+    "end_date": null,
+    "ringtone": "default",
+    "notes": "Take with food",
+    "status": "active",
+    "created_at": "2025-11-29 20:09:03.671241",
+    "updated_at": "2025-11-29 20:09:03.671241",
+    "next_dose_time": null,
+    "total_doses": 0,
+    "taken_doses": 0,
+    "missed_doses": 0
+  }
+}
