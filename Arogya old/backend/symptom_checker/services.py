@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 # Environment configuration
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyAwdtypJdvhP4MsnfX4bjQpMjtnSgAtv5g")  # Fallback for testing
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")  # NO FALLBACK - MUST BE SET VIA ENVIRONMENT
 GEMINI_API_URL = os.getenv("GEMINI_API_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent")
 
 # Cache configuration
