@@ -2,11 +2,13 @@ import pandas as pd
 import math
 from typing import List, Optional, Tuple
 from .models import Hospital, LocationSuggestion
+from .karnataka_enhancer import KarnatakaHospitalEnhancer
 
 class HospitalFinderService:
     def __init__(self):
         self.hospitals: List[Hospital] = []
         self.locations: List[LocationSuggestion] = []
+        self.karnataka_enhancer = KarnatakaHospitalEnhancer()
         self.load_data()
     
     def load_data(self):
@@ -61,6 +63,12 @@ class HospitalFinderService:
                     self.locations.append(location)
             
             print(f"Loaded {len(self.hospitals)} hospitals and {len(self.locations)} locations")
+            
+            # Enhance Karnataka hospitals with better data
+            print("Enhancing Karnataka hospitals...")
+            self.hospitals = self.karnataka_enhancer.enhance_karnataka_hospitals(self.hospitals)
+            karnataka_count = len([h for h in self.hospitals if h.state.lower() == 'karnataka'])
+            print(f"Enhanced {karnataka_count} Karnataka hospitals with village-level data")
             
         except Exception as e:
             print(f"Error loading hospital data: {e}")
@@ -133,9 +141,13 @@ class HospitalFinderService:
         return results
     
     def search_by_location_name(self, query: str) -> List[Hospital]:
-        """Search hospitals by location name - improved to work for any city/state in India"""
+        """Search hospitals by location name - enhanced for Karnataka"""
         query = query.lower().strip()
-        results = []
+        
+        # Check if this is a Karnataka search
+        if self._is_karnataka_search(query):
+            print(f"Using enhanced Karnataka search for: {query}")
+            return self.karnataka_enhancer.search_karnataka_enhanced(query, self.hospitals)
         
         # First, check if query matches any state exactly
         all_states = set()
@@ -204,6 +216,19 @@ class HospitalFinderService:
             return state_matches[:50]
         
         return []
+    
+    def _is_karnataka_search(self, query: str) -> bool:
+        """Check if the search is related to Karnataka"""
+        karnataka_keywords = [
+            'karnataka', 'bangalore', 'bengaluru', 'mandya', 'kolar', 'mysore', 'mysuru',
+            'chikballapur', 'tumkur', 'davanagere', 'bellary', 'bijapur', 'raichur',
+            'gulbarga', 'bidar', 'hubli', 'dharwad', 'belgaum', 'bagalkot', 'gadag',
+            'haveri', 'shivamogga', 'chitradurga', 'chikmagalur', 'udupi', 'dakshina kannada',
+            'uttara kannada', 'kodagu', 'hassan', 'koppal', 'yadgir', 'chamarajanagar', 'ramanagara',
+            'district hospital', 'taluk hospital', 'chc', 'phc', 'sub centre'
+        ]
+        
+        return any(keyword in query for keyword in karnataka_keywords)
     
     def filter_by_category(self, hospitals: List[Hospital], categories: List[str]) -> List[Hospital]:
         """Filter hospitals by category - improved filtering for real data"""

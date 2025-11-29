@@ -25,6 +25,11 @@ class Hospital(BaseModel):
     town: Optional[str] = None
     subtown: Optional[str] = None
     village: Optional[str] = None
+    # Karnataka enhancement fields
+    facility_type: Optional[str] = None
+    area_info: Optional[dict] = None
+    is_karnataka_enhanced: Optional[bool] = False
+    data_source: Optional[str] = None
 
 class HospitalSearchResponse(BaseModel):
     hospitals: List[Hospital]
