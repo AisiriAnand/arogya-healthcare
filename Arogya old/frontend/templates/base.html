@@ -55,6 +55,16 @@
                     <a href="/symptom-checker" class="text-gray-700 hover:text-purple-700">Symptom Checker</a>
                     <a href="/schemes" class="text-gray-700 hover:text-purple-700">Schemes</a>
                     <a href="/dashboard" class="text-gray-700 hover:text-purple-700">Dashboard</a>
+                    
+                    <!-- Authentication Links -->
+                    <div id="auth-links-desktop" class="flex space-x-4">
+                        <a href="/login" class="text-purple-700 hover:text-purple-900 font-medium">Login</a>
+                        <a href="/register" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Register</a>
+                    </div>
+                    <div id="user-menu-desktop" class="hidden flex items-center space-x-4">
+                        <span id="user-email" class="text-gray-700"></span>
+                        <button id="logout-btn" class="text-red-600 hover:text-red-800">Logout</button>
+                    </div>
                 </div>
             </div>
             
@@ -66,6 +76,16 @@
                     <a href="/symptom-checker" class="text-gray-700 hover:text-purple-700 py-2">Symptom Checker</a>
                     <a href="/schemes" class="text-gray-700 hover:text-purple-700 py-2">Schemes</a>
                     <a href="/dashboard" class="text-gray-700 hover:text-purple-700 py-2">Dashboard</a>
+                    
+                    <!-- Mobile Authentication Links -->
+                    <div id="auth-links-mobile" class="pt-2 border-t">
+                        <a href="/login" class="text-purple-700 hover:text-purple-900 font-medium py-2 block">Login</a>
+                        <a href="/register" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 inline-block mt-2">Register</a>
+                    </div>
+                    <div id="user-menu-mobile" class="hidden pt-2 border-t">
+                        <span id="user-email-mobile" class="text-gray-700 py-2 block"></span>
+                        <button id="logout-btn-mobile" class="text-red-600 hover:text-red-800 py-2">Logout</button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -126,9 +146,84 @@
 
         // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Add any page-specific JavaScript here
+            // Authentication UI management
+            updateAuthUI();
+            
+            // Setup logout buttons
+            const logoutBtns = document.querySelectorAll('[id^="logout-btn"]');
+            logoutBtns.forEach(btn => {
+                btn.addEventListener('click', logout);
+            });
         });
+
+        // Authentication functions
+        function getAuthToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        function isAuthenticated() {
+            return !!getAuthToken();
+        }
+
+        function logout() {
+            // Call backend logout
+            const token = getAuthToken();
+            if (token) {
+                fetch('http://localhost:5000/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }).catch(error => console.log('Logout error:', error));
+            }
+            
+            // Clear local storage
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            
+            // Update UI and redirect
+            updateAuthUI();
+            window.location.href = '/login';
+        }
+
+        function updateAuthUI() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const isAuth = isAuthenticated();
+            
+            // Desktop elements
+            const authLinksDesktop = document.getElementById('auth-links-desktop');
+            const userMenuDesktop = document.getElementById('user-menu-desktop');
+            const userEmailDesktop = document.getElementById('user-email');
+            
+            // Mobile elements
+            const authLinksMobile = document.getElementById('auth-links-mobile');
+            const userMenuMobile = document.getElementById('user-menu-mobile');
+            const userEmailMobile = document.getElementById('user-email-mobile');
+            
+            if (isAuth && user.email) {
+                // Show user menu, hide auth links
+                authLinksDesktop?.classList.add('hidden');
+                userMenuDesktop?.classList.remove('hidden');
+                authLinksMobile?.classList.add('hidden');
+                userMenuMobile?.classList.remove('hidden');
+                
+                // Set user email
+                if (userEmailDesktop) userEmailDesktop.textContent = user.email || user.full_name || 'User';
+                if (userEmailMobile) userEmailMobile.textContent = user.email || user.full_name || 'User';
+            } else {
+                // Show auth links, hide user menu
+                authLinksDesktop?.classList.remove('hidden');
+                userMenuDesktop?.classList.add('hidden');
+                authLinksMobile?.classList.remove('hidden');
+                userMenuMobile?.classList.add('hidden');
+            }
+        }
     </script>
+    
+    <!-- Global Notification System -->
+    <script src="/static/js/notifications.js"></script>
     
     {% block scripts %}{% endblock %}
 </body>

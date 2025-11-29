@@ -9,14 +9,14 @@ from .models import (
     NotificationSettings, NotificationSettingsUpdate,
     ReminderStatus, FrequencyType
 )
+from auth.router import get_current_user
 
 router = APIRouter(prefix="/medication", tags=["medication"])
 
-# Dependency to get user_id (in real app, this would come from authentication)
-def get_current_user_id():
-    # For demo purposes, return a fixed user ID
-    # In production, this would extract from JWT token or session
-    return "demo_user_123"
+# Dependency to get user_id from authentication
+def get_current_user_id(current_user: dict = Depends(get_current_user)):
+    """Extract user_id from authenticated user"""
+    return current_user["id"]
 
 @router.post("/reminders", response_model=ReminderResponse)
 async def create_reminder(
@@ -50,8 +50,12 @@ async def get_reminder(
     """Get a specific medication reminder"""
     try:
         reminder = medication_service.get_reminder(reminder_id)
-        if not reminder or reminder.user_id != user_id:
+        if not reminder:
             raise HTTPException(status_code=404, detail="Reminder not found")
+        
+        if reminder.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
         return medication_service._convert_to_response(reminder)
     except HTTPException:
         raise
@@ -64,11 +68,14 @@ async def update_reminder(
     update_data: ReminderUpdate,
     user_id: str = Depends(get_current_user_id)
 ):
-    """Update a medication reminder"""
+    """Update an existing medication reminder"""
     try:
         reminder = medication_service.get_reminder(reminder_id)
-        if not reminder or reminder.user_id != user_id:
+        if not reminder:
             raise HTTPException(status_code=404, detail="Reminder not found")
+        
+        if reminder.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Access denied")
         
         updated_reminder = medication_service.update_reminder(reminder_id, update_data)
         if not updated_reminder:
@@ -88,14 +95,38 @@ async def delete_reminder(
     """Delete a medication reminder"""
     try:
         reminder = medication_service.get_reminder(reminder_id)
-        if not reminder or reminder.user_id != user_id:
+        if not reminder:
             raise HTTPException(status_code=404, detail="Reminder not found")
+        
+        if reminder.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Access denied")
         
         success = medication_service.delete_reminder(reminder_id)
         if not success:
             raise HTTPException(status_code=404, detail="Reminder not found")
         
         return {"message": "Reminder deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/reminders/{reminder_id}/log", response_model=dict)
+async def log_medication(
+    reminder_id: str,
+    user_id: str = Depends(get_current_user_id)
+):
+    """Log medication as taken"""
+    try:
+        reminder = medication_service.get_reminder(reminder_id)
+        if not reminder:
+            raise HTTPException(status_code=404, detail="Reminder not found")
+        
+        if reminder.user_id != user_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        log = medication_service.log_medication(reminder_id, user_id, "taken")
+        return {"message": "Medication logged as taken", "log_id": log.id}
     except HTTPException:
         raise
     except Exception as e:
@@ -112,53 +143,37 @@ async def get_today_schedule(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/reminders/{reminder_id}/log")
-async def log_medication(
-    reminder_id: str,
-    status: str,  # "taken", "skipped", "missed"
-    notes: Optional[str] = None,
-    user_id: str = Depends(get_current_user_id)
-):
-    """Log medication taken, skipped, or missed"""
-    try:
-        if status not in ["taken", "skipped", "missed"]:
-            raise HTTPException(status_code=400, detail="Invalid status. Must be 'taken', 'skipped', or 'missed'")
-        
-        log = medication_service.log_medication_taken(reminder_id, user_id, status, notes)
-        if not log:
-            raise HTTPException(status_code=404, detail="Reminder not found")
-        
-        return {"message": f"Medication {status} successfully", "log_id": log.id}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 @router.get("/stats", response_model=ReminderStats)
-async def get_medication_stats(
+async def get_reminder_stats(
     user_id: str = Depends(get_current_user_id)
 ):
-    """Get medication adherence statistics"""
+    """Get medication statistics for the current user"""
     try:
-        stats = medication_service.get_reminder_stats(user_id)
+        stats = medication_service.get_user_stats(user_id)
         return stats
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/upcoming", response_model=List[ReminderResponse])
-async def get_upcoming_reminders(
-    hours_ahead: int = Query(default=24, description="Hours ahead to look for reminders"),
+@router.get("/logs", response_model=List[dict])
+async def get_medication_logs(
     user_id: str = Depends(get_current_user_id)
 ):
-    """Get upcoming medication reminders"""
+    """Get medication logs for the current user"""
     try:
-        if hours_ahead < 1 or hours_ahead > 168:  # Max 1 week
-            raise HTTPException(status_code=400, detail="hours_ahead must be between 1 and 168")
+        logs = [log for log in medication_service.logs.values() if log.user_id == user_id]
+        logs.sort(key=lambda log: log.taken_at, reverse=True)
         
-        reminders = medication_service.get_upcoming_reminders(user_id, hours_ahead)
-        return [medication_service._convert_to_response(r) for r in reminders]
-    except HTTPException:
-        raise
+        return [
+            {
+                "id": log.id,
+                "reminder_id": log.reminder_id,
+                "taken_at": log.taken_at.isoformat(),
+                "status": log.status,
+                "notes": log.notes,
+                "created_at": log.created_at.isoformat()
+            }
+            for log in logs
+        ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -166,7 +181,7 @@ async def get_upcoming_reminders(
 async def get_notification_settings(
     user_id: str = Depends(get_current_user_id)
 ):
-    """Get notification settings for the user"""
+    """Get notification settings for the current user"""
     try:
         settings = medication_service.get_notification_settings(user_id)
         return settings
@@ -178,42 +193,14 @@ async def update_notification_settings(
     settings_update: NotificationSettingsUpdate,
     user_id: str = Depends(get_current_user_id)
 ):
-    """Update notification settings for the user"""
+    """Update notification settings for the current user"""
     try:
         settings = medication_service.update_notification_settings(user_id, settings_update)
         return settings
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/logs", response_model=List[MedicationLog])
-async def get_medication_logs(
-    start_date: Optional[date] = Query(None, description="Start date filter"),
-    end_date: Optional[date] = Query(None, description="End date filter"),
-    reminder_id: Optional[str] = Query(None, description="Filter by specific reminder"),
-    user_id: str = Depends(get_current_user_id)
-):
-    """Get medication logs for the user"""
-    try:
-        logs = [log for log in medication_service.logs.values() if log.user_id == user_id]
-        
-        # Apply filters
-        if reminder_id:
-            logs = [log for log in logs if log.reminder_id == reminder_id]
-        
-        if start_date:
-            logs = [log for log in logs if log.scheduled_time.date() >= start_date]
-        
-        if end_date:
-            logs = [log for log in logs if log.scheduled_time.date() <= end_date]
-        
-        # Sort by scheduled time (newest first)
-        logs.sort(key=lambda log: log.scheduled_time, reverse=True)
-        
-        return logs[:100]  # Limit to last 100 logs
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/test-notification")
+@router.post("/notifications/test")
 async def test_notification(
     user_id: str = Depends(get_current_user_id)
 ):

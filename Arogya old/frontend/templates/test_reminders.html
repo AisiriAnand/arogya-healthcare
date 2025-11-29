@@ -7,9 +7,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
+    <!-- Authentication Header -->
+    <div class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-blue-600">AROGYA Healthcare</h1>
+                <div id="user-info" class="flex items-center space-x-4">
+                    <span id="user-name" class="text-gray-700"></span>
+                    <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-gray-900">Medication Reminders</h1>
-        <p class="text-gray-600">Never miss your medications with smart reminders</p>
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Medication Reminders</h1>
+                <p class="text-gray-600">Never miss your medications with smart reminders</p>
+            </div>
+            <div id="auth-status" class="text-sm text-gray-500"></div>
+        </div>
         
         <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
             <h2 class="text-xl font-bold mb-4">Add New Reminder</h2>
@@ -67,17 +85,13 @@
     </div>
 
 <script>
-// Initialize page
+// Set default date
 document.addEventListener('DOMContentLoaded', function() {
-    loadReminders();
     document.querySelector('input[name="startDate"]').value = new Date().toISOString().split('T')[0];
-    
-    // Check for due reminders every 30 seconds
-    setInterval(checkDueReminders, 30000);
+});
     
     // Check immediately on page load
     setTimeout(checkDueReminders, 2000);
-});
 
 // Form submission
 document.getElementById('reminderForm').addEventListener('submit', async function(e) {
@@ -238,8 +252,8 @@ function showMedicationNotification(reminder) {
                 <button onclick="skipDoseFromNotification('${reminder.id}'); this.closest('.fixed').remove();" class="flex-1 bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700">
                     Skip
                 </button>
-                <button onclick="this.closest('.fixed').remove();" class="flex-1 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700">
-                    Later
+                <button onclick="snoozeReminder('${reminder.id}', '${reminder.medication_name}'); this.closest('.fixed').remove();" class="flex-1 bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700">
+                    Later (5 min)
                 </button>
             </div>
         </div>
@@ -288,27 +302,296 @@ async function skipDoseFromNotification(reminderId) {
     }
 }
 
-// Play notification sound (simulated)
+// Snooze reminder - show again after 5 minutes
+function snoozeReminder(reminderId, medicationName) {
+    console.log(`Snoozing reminder ${reminderId} for ${medicationName} for 5 minutes`);
+    
+    // Store snooze info
+    const snoozeKey = `snooze_${reminderId}`;
+    const snoozeData = {
+        reminderId: reminderId,
+        medicationName: medicationName,
+        snoozeTime: new Date().toISOString(),
+        nextNotificationTime: new Date(Date.now() + 5 * 60 * 1000).toISOString() // 5 minutes from now
+    };
+    localStorage.setItem(snoozeKey, JSON.stringify(snoozeData));
+    
+    // Show confirmation
+    showSnoozeConfirmation(medicationName);
+}
+
+// Show snooze confirmation
+function showSnoozeConfirmation(medicationName) {
+    const confirmation = document.createElement('div');
+    confirmation.className = 'fixed top-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg z-50';
+    confirmation.innerHTML = `
+        <div class="flex items-center">
+            <svg class="h-5 w-5 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+                <p class="text-sm font-medium text-blue-800">Reminder Snoozed</p>
+                <p class="text-sm text-blue-600">${medicationName} reminder will show again in 5 minutes</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(confirmation);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        if (document.body.contains(confirmation)) {
+            confirmation.remove();
+        }
+    }, 3000);
+}
+
+// Check for snoozed reminders
+function checkSnoozedReminders() {
+    const now = new Date();
+    
+    // Check all snoozed reminders
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('snooze_')) {
+            try {
+                const snoozeData = JSON.parse(localStorage.getItem(key));
+                const nextNotificationTime = new Date(snoozeData.nextNotificationTime);
+                
+                // If it's time to show the notification again
+                if (now >= nextNotificationTime) {
+                    console.log(`Reshowing snoozed reminder: ${snoozeData.medicationName}`);
+                    
+                    // Create reminder object for notification
+                    const reminder = {
+                        id: snoozeData.reminderId,
+                        medication_name: snoozeData.medicationName,
+                        dosage: 'Snoozed Reminder',
+                        reminder_times: ['Now'],
+                        notes: 'This was snoozed and is now being shown again'
+                    };
+                    
+                    // Show notification
+                    showMedicationNotification(reminder);
+                    
+                    // Remove snooze data
+                    localStorage.removeItem(key);
+                }
+            } catch (error) {
+                console.error('Error checking snoozed reminder:', error);
+                // Remove corrupted snooze data
+                localStorage.removeItem(key);
+            }
+        }
+    }
+}
+
+// Enhanced notification sound with better audio
 function playNotificationSound() {
-    // Create a simple beep sound using Web Audio API
     try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
         
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        // Create a more attention-grabbing sound pattern
+        const playBeep = (frequency, duration, delay = 0) => {
+            setTimeout(() => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration/1000);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration/1000);
+            }, delay);
+        };
         
-        oscillator.frequency.value = 800; // 800Hz beep
-        oscillator.type = 'sine';
+        // Play a pattern: high-low-high (like a phone ring)
+        playBeep(1000, 200, 0);    // High beep
+        playBeep(600, 200, 300);    // Low beep  
+        playBeep(1000, 300, 600);   // High beep (longer)
         
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        // Request notification permission if not granted
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
         
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.5);
+        // Also show browser notification if permitted
+        if ("Notification" in window && Notification.permission === "granted") {
+            new Notification("Medication Reminder", {
+                body: "Time to take your medication!",
+                icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23ef4444' viewBox='0 0 20 20'%3E%3Cpath fill-rule='evenodd' d='M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z' clip-rule='evenodd'/%3E%3C/svg%3E",
+                tag: "medication-reminder"
+            });
+        }
+        
     } catch (error) {
-        console.log('Audio not supported');
+        console.log('Audio notification not supported:', error);
+    }
+}
+
+// Authentication functions
+function getAuthToken() {
+    return localStorage.getItem('access_token');
+}
+
+function isAuthenticated() {
+    return !!getAuthToken();
+}
+
+function logout() {
+    // Call backend logout
+    const token = getAuthToken();
+    if (token) {
+        fetch('http://localhost:5000/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        }).catch(error => console.log('Logout error:', error));
+    }
+    
+    // Clear local storage
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    
+    // Redirect to login
+    window.location.href = '/login';
+}
+
+function updateAuthUI() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userName = document.getElementById('user-name');
+    const authStatus = document.getElementById('auth-status');
+    
+    if (isAuthenticated() && user.email) {
+        userName.textContent = user.email || user.full_name || 'User';
+        authStatus.textContent = 'Authenticated';
+    } else {
+        userName.textContent = 'Guest';
+        authStatus.textContent = 'Not authenticated';
+    }
+}
+
+// Check authentication on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (!isAuthenticated()) {
+        // Redirect to login if not authenticated
+        window.location.href = '/login';
+        return;
+    }
+    
+    // Update UI with user info
+    updateAuthUI();
+    
+    // Set up logout button
+    document.getElementById('logout-btn').addEventListener('click', logout);
+    
+    // Update all API calls to include auth token
+    const originalFetch = window.fetch;
+    window.fetch = function(url, options = {}) {
+        const token = getAuthToken();
+        if (token) {
+            options.headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            };
+        }
+        return originalFetch(url, options);
+    };
+    
+    // Load reminders (now with auth)
+    loadReminders();
+    
+    // Check immediately for due reminders
+    checkDueReminders();
+    checkSnoozedReminders();
+    
+    // Start notification checking (every 30 seconds)
+    setInterval(() => {
+        checkDueReminders();
+        checkSnoozedReminders();
+    }, 30000);
+    
+    // Also check snoozed reminders more frequently (every 10 seconds)
+    setInterval(checkSnoozedReminders, 10000);
+    
+    // Check exact timing every minute for precision
+    setInterval(() => {
+        checkExactTimeReminders();
+    }, 60000);
+});
+
+// Check for exact time reminders (more precise)
+function checkExactTimeReminders() {
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    
+    console.log(`Checking exact time reminders at ${currentTime}`);
+    
+    // Get reminders from localStorage or API
+    const reminders = JSON.parse(localStorage.getItem('reminders') || '[]');
+    
+    reminders.forEach(reminder => {
+        if (reminder.status === 'active') {
+            reminder.reminder_times.forEach(time => {
+                const reminderTime = time.split(':').slice(0, 2).join(':'); // Get HH:MM format
+                
+                // Check if current time matches reminder time (within 1 minute window)
+                if (reminderTime === currentTime) {
+                    console.log(`Exact time match: ${reminder.medication_name} at ${currentTime}`);
+                    
+                    // Check if we already notified for this time today
+                    const notificationKey = `notified_${reminder.id}_${new Date().toDateString()}_${reminderTime}`;
+                    const alreadyNotified = localStorage.getItem(notificationKey);
+                    
+                    if (!alreadyNotified) {
+                        console.log(`Showing exact time notification for ${reminder.medication_name}`);
+                        showMedicationNotification(reminder);
+                        
+                        // Mark as notified for this time
+                        localStorage.setItem(notificationKey, 'true');
+                        
+                        // Clear old notification marks (older than 2 hours)
+                        clearOldNotificationMarks();
+                    }
+                }
+            });
+        }
+    });
+}
+
+// Clear old notification marks to prevent memory buildup
+function clearOldNotificationMarks() {
+    const now = new Date();
+    const twoHoursAgo = now.getTime() - (2 * 60 * 60 * 1000);
+    
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('notified_')) {
+            try {
+                const parts = key.split('_');
+                if (parts.length >= 4) {
+                    const dateStr = parts[2]; // Extract date part
+                    const timeStr = parts[3]; // Extract time part
+                    const notificationTime = new Date(`${dateStr} ${timeStr}:00`);
+                    
+                    if (notificationTime.getTime() < twoHoursAgo) {
+                        localStorage.removeItem(key);
+                    }
+                }
+            } catch (error) {
+                // Remove corrupted keys
+                localStorage.removeItem(key);
+            }
+        }
     }
 }
 

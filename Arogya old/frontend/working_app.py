@@ -26,6 +26,20 @@ def home():
     except Exception as e:
         return f'<h1>AROGYA Healthcare</h1><p>Template Error: {str(e)}</p><p><a href="/dashboard">Dashboard</a></p>'
 
+@app.route('/login')
+def login():
+    try:
+        return render_template('login.html')
+    except Exception as e:
+        return f'<h1>Login</h1><p>Template Error: {str(e)}</p><p><a href="/">Home</a></p>'
+
+@app.route('/register')
+def register():
+    try:
+        return render_template('register.html')
+    except Exception as e:
+        return f'<h1>Register</h1><p>Template Error: {str(e)}</p><p><a href="/">Home</a></p>'
+
 @app.route('/dashboard')
 def dashboard():
     try:
