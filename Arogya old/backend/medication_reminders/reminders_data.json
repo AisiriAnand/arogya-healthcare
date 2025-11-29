@@ -1,0 +1,86 @@
+{
+  "e66bf8da-7005-497c-86c8-51a9d9d5b97d": {
+    "id": "e66bf8da-7005-497c-86c8-51a9d9d5b97d",
+    "user_id": "demo_user_123",
+    "medication_name": "DOLO",
+    "dosage": "25MG",
+    "frequency": "daily",
+    "reminder_times": [
+      "22:20:00"
+    ],
+    "start_date": "2025-11-29",
+    "end_date": null,
+    "ringtone": "default",
+    "notes": null,
+    "status": "active",
+    "created_at": "2025-11-29 22:20:04.580827",
+    "updated_at": "2025-11-29 22:20:04.580827",
+    "next_dose_time": "2025-11-30 22:20:00",
+    "total_doses": 0,
+    "taken_doses": 0,
+    "missed_doses": 0
+  },
+  "ca5c12bb-7519-40d3-a207-0c49b3ff18dc": {
+    "id": "ca5c12bb-7519-40d3-a207-0c49b3ff18dc",
+    "user_id": "ece78b8a-f981-4bf7-889c-e99062b34ab9",
+    "medication_name": "DOLO",
+    "dosage": "25MG",
+    "frequency": "daily",
+    "reminder_times": [
+      "23:03:00"
+    ],
+    "start_date": "2025-11-29",
+    "end_date": null,
+    "ringtone": "default",
+    "notes": null,
+    "status": "active",
+    "created_at": "2025-11-29 23:02:20.970871",
+    "updated_at": "2025-11-29 23:02:20.970871",
+    "next_dose_time": "2025-11-29 23:03:00",
+    "total_doses": 0,
+    "taken_doses": 0,
+    "missed_doses": 0
+  },
+  "2f3cb32e-bbbd-4b15-b4bb-125e6f861bad": {
+    "id": "2f3cb32e-bbbd-4b15-b4bb-125e6f861bad",
+    "user_id": "ece78b8a-f981-4bf7-889c-e99062b34ab9",
+    "medication_name": "tretitoin",
+    "dosage": "sponts on pimples",
+    "frequency": "daily",
+    "reminder_times": [
+      "23:10:00"
+    ],
+    "start_date": "2025-11-29",
+    "end_date": null,
+    "ringtone": "default",
+    "notes": null,
+    "status": "active",
+    "created_at": "2025-11-29 23:09:33.417536",
+    "updated_at": "2025-11-29 23:09:33.417536",
+    "next_dose_time": "2025-11-29 23:10:00",
+    "total_doses": 0,
+    "taken_doses": 0,
+    "missed_doses": 0
+  },
+  "4e35928d-a449-4593-b30d-6de1063f6781": {
+    "id": "4e35928d-a449-4593-b30d-6de1063f6781",
+    "user_id": "ece78b8a-f981-4bf7-889c-e99062b34ab9",
+    "medication_name": "ASPERIN",
+    "dosage": "200MG",
+    "frequency": "daily",
+    "reminder_times": [
+      "23:17:00"
+    ],
+    "start_date": "2025-11-29",
+    "end_date": null,
+    "ringtone": "default",
+    "notes": null,
+    "status": "active",
+    "created_at": "2025-11-29 23:16:13.508523",
+    "updated_at": "2025-11-29 23:16:13.508523",
+    "next_dose_time": "2025-11-29 23:17:00",
+    "total_doses": 0,
+    "taken_doses": 0,
+    "missed_doses": 0
+  }
+}
