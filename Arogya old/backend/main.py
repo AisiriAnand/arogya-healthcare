@@ -7,9 +7,24 @@ from typing import List, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
 from pathlib import Path
+import hashlib
+import requests
+import time
+from datetime import timedelta
 
 # Import hospital finder router
 from hospital_finder.router import router as hospital_router
+
+# Environment configuration for Gemini API
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_API_URL = os.getenv("GEMINI_API_URL", "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent")
+
+# Simple cache for Gemini responses
+CACHE_FILE = Path("gemini_cache.json")
+CACHE_DURATION = timedelta(hours=24)
+
+# Logging setup
+LOG_FILE = Path("predictions.log")
 
 app = FastAPI(title="Rural Healthcare Backend", version="1.0.0")
 
@@ -52,15 +67,23 @@ class Reminder(BaseModel):
 class SymptomCheckRequest(BaseModel):
     symptoms: List[str] = []
     description: str = ""
+    age: int = None
+    sex: str = ""
+    onset_days: int = None
+    severity: str = ""
+    comorbidities: List[str] = []
 
 class PredictionResult(BaseModel):
     condition: str
     score: float
+    explanation: str = ""
 
 class SymptomCheckResponse(BaseModel):
     predictions: List[PredictionResult]
     model_version: str
-    explain: List[str]
+    triage: str = ""
+    confidence: float = 0.0
+    recommendation_text: str = ""
 
 # Sample data
 doctors_data = [
@@ -119,6 +142,187 @@ reminders_data = [
     }
 ]
 
+# Helper functions for Gemini LLM integration
+def get_input_hash(symptoms_text: str, age: int = None, sex: str = "") -> str:
+    """Generate hash for caching identical inputs"""
+    content = f"{symptoms_text}_{age}_{sex}"
+    return hashlib.md5(content.encode()).hexdigest()
+
+def load_cache() -> dict:
+    """Load cache from file"""
+    if CACHE_FILE.exists():
+        try:
+            with open(CACHE_FILE, 'r') as f:
+                cache_data = json.load(f)
+                # Filter out expired entries
+                current_time = time.time()
+                return {
+                    k: v for k, v in cache_data.items() 
+                    if current_time - v.get('timestamp', 0) < CACHE_DURATION.total_seconds()
+                }
+        except:
+            pass
+    return {}
+
+def save_cache(cache_data: dict):
+    """Save cache to file"""
+    try:
+        with open(CACHE_FILE, 'w') as f:
+            json.dump(cache_data, f)
+    except:
+        pass
+
+def log_request(input_hash: str, top_prediction: str, confidence: float, triage: str, model_version: str):
+    """Log anonymized request data"""
+    try:
+        with open(LOG_FILE, 'a') as f:
+            timestamp = datetime.now().isoformat()
+            log_entry = f"{timestamp},{input_hash},{top_prediction},{confidence:.2f},{triage},{model_version}\n"
+            f.write(log_entry)
+    except:
+        pass
+
+def call_gemini_api(prompt: str) -> dict:
+    """Call Gemini API with timeout and retry logic"""
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=503, detail="Gemini API key not configured")
+    
+    headers = {
+        "Content-Type": "application/json",
+    }
+    
+    data = {
+        "contents": [{
+            "parts": [{
+                "text": prompt
+            }]
+        }],
+        "generationConfig": {
+            "temperature": 0.1,
+            "topK": 32,
+            "topP": 1,
+            "maxOutputTokens": 1024,
+        }
+    }
+    
+    # Add API key to URL
+    url = f"{GEMINI_API_URL}?key={GEMINI_API_KEY}"
+    
+    try:
+        response = requests.post(url, headers=headers, json=data, timeout=8)
+        response.raise_for_status()
+        
+        result = response.json()
+        if 'candidates' in result and len(result['candidates']) > 0:
+            content = result['candidates'][0]['content']['parts'][0]['text']
+            return {"content": content, "success": True}
+        else:
+            return {"error": "No valid response from Gemini", "success": False}
+            
+    except requests.exceptions.Timeout:
+        # Retry once on timeout
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=8)
+            response.raise_for_status()
+            result = response.json()
+            if 'candidates' in result and len(result['candidates']) > 0:
+                content = result['candidates'][0]['content']['parts'][0]['text']
+                return {"content": content, "success": True}
+        except:
+            pass
+        return {"error": "Request timeout", "success": False}
+    except Exception as e:
+        return {"error": str(e), "success": False}
+
+def build_gemini_prompt(symptoms_text: str, age: int = None, sex: str = "", onset_days: int = None, severity: str = "", comorbidities: List[str] = []) -> str:
+    """Build carefully designed prompt for Gemini"""
+    
+    context_parts = []
+    if age:
+        context_parts.append(f"Age: {age} years")
+    if sex:
+        context_parts.append(f"Sex: {sex}")
+    if onset_days:
+        context_parts.append(f"Symptom onset: {onset_days} days ago")
+    if severity:
+        context_parts.append(f"Severity: {severity}")
+    if comorbidities:
+        context_parts.append(f"Comorbidities: {', '.join(comorbidities)}")
+    
+    context = "\n".join(context_parts)
+    
+    prompt = f"""
+You are a medical AI assistant. Analyze the following symptoms and provide a structured assessment.
+
+PATIENT INFORMATION:
+{context}
+
+SYMPTOMS:
+{symptoms_text}
+
+TASK: Interpret these symptoms and provide a structured JSON response with:
+1. Top 3 likely diagnoses with probabilities (0-1) and brief explanations
+2. Triage level (emergency/urgent/non-urgent/self-care)
+3. Overall confidence (0-1)
+4. Recommended next steps
+5. Critical red flags that require immediate attention
+
+SAFETY INSTRUCTION: If symptoms suggest life-threatening conditions (severe chest pain, sudden weakness, severe breathing difficulty, high fever with altered mental status, severe headache with neurological symptoms), ALWAYS set triage to "emergency" and recommend immediate medical attention.
+
+RESPONSE FORMAT (strict JSON):
+{{
+    "predictions": [
+        {{"label": "Diagnosis 1", "probability": 0.7, "explanation": "Brief reasoning"}},
+        {{"label": "Diagnosis 2", "probability": 0.2, "explanation": "Brief reasoning"}},
+        {{"label": "Diagnosis 3", "probability": 0.1, "explanation": "Brief reasoning"}}
+    ],
+    "triage": "emergency|urgent|non-urgent|self-care",
+    "confidence": 0.85,
+    "recommendation_text": "Clear medical advice and next steps",
+    "model_version": "gemini-llm-v1"
+}}
+
+Provide ONLY the JSON response, no additional text.
+"""
+    
+    return prompt
+
+def parse_gemini_response(content: str) -> dict:
+    """Parse Gemini response to extract JSON"""
+    try:
+        # Try to extract JSON from the response
+        import re
+        json_match = re.search(r'\{.*\}', content, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(0)
+            return json.loads(json_str)
+        else:
+            # If no JSON found, try parsing the entire content
+            return json.loads(content)
+    except:
+        # If parsing fails, return fallback response
+        return {
+            "predictions": [
+                {"label": "Unable to compute", "probability": 0.0, "explanation": "Could not parse AI response"}
+            ],
+            "triage": "refer",
+            "confidence": 0.0,
+            "recommendation_text": "Please consult a clinician for proper evaluation.",
+            "model_version": "gemini-llm-v1"
+        }
+
+def get_fallback_response() -> dict:
+    """Fallback response when API fails"""
+    return {
+        "predictions": [
+            {"label": "Unable to compute", "probability": 0.0, "explanation": "AI service unavailable"}
+        ],
+        "triage": "refer",
+        "confidence": 0.0,
+        "recommendation_text": "Please consult a clinician for proper evaluation.",
+        "model_version": "gemini-llm-v1"
+    }
+
 # Endpoints
 @app.get("/api/health")
 async def health_check():
@@ -167,52 +371,102 @@ async def get_symptom_list():
 
 @app.post("/api/symptom-checker/predict", response_model=SymptomCheckResponse)
 async def predict_disease(request: SymptomCheckRequest):
-    """Predict disease based on symptoms"""
-    if not symptom_pipeline:
-        raise HTTPException(status_code=503, detail="Symptom checker model not available")
-    
+    """Predict disease based on symptoms using Gemini LLM"""
     try:
+        # Validate and sanitize input
+        if not request.description and not request.symptoms:
+            raise HTTPException(status_code=400, detail="No symptoms provided")
+        
         # Combine symptoms list and description into text
-        if request.description:
-            symptom_text = request.description.lower()
-        else:
-            symptom_text = " ".join([s.lower() for s in request.symptoms])
+        symptoms_text = request.description or " ".join(request.symptoms)
+        symptoms_text = symptoms_text.strip()[:1000]  # Limit length
         
-        # Make prediction
-        prediction = symptom_pipeline.predict([symptom_text])[0]
-        probabilities = symptom_pipeline.predict_proba([symptom_text])[0]
+        # Generate cache key
+        cache_key = get_input_hash(symptoms_text, request.age, request.sex)
         
-        # Get top predictions with scores
-        classes = symptom_pipeline.classes_
-        results = []
-        for i, prob in enumerate(probabilities):
-            if prob > 0.01:  # Only include predictions with >1% confidence
-                results.append(PredictionResult(
-                    condition=classes[i],
-                    score=float(prob)
-                ))
+        # Check cache first
+        cache = load_cache()
+        if cache_key in cache:
+            cached_result = cache[cache_key]['response']
+            log_request(cache_key, 
+                      cached_result.get('predictions', [{}])[0].get('label', 'unknown'),
+                      cached_result.get('confidence', 0.0),
+                      cached_result.get('triage', 'unknown'),
+                      cached_result.get('model_version', 'unknown'))
+            return SymptomCheckResponse(**cached_result)
         
-        # Sort by confidence and take top 5
-        results.sort(key=lambda x: x.score, reverse=True)
-        results = results[:5]
-        
-        # Extract explanation (top symptoms from TF-IDF)
-        feature_names = symptom_pipeline.named_steps['tfidf'].get_feature_names_out()
-        explain = []
-        if request.symptoms:
-            explain = request.symptoms[:3]  # Top 3 symptoms as explanation
-        elif request.description:
-            words = request.description.split()
-            explain = words[:3]
-        
-        return SymptomCheckResponse(
-            predictions=results,
-            model_version=model_info.get('model_version', 'v1') if model_info else 'v1',
-            explain=explain
+        # Build prompt for Gemini
+        prompt = build_gemini_prompt(
+            symptoms_text=symptoms_text,
+            age=request.age,
+            sex=request.sex,
+            onset_days=request.onset_days,
+            severity=request.severity,
+            comorbidities=request.comorbidities
         )
         
+        # Call Gemini API
+        gemini_response = call_gemini_api(prompt)
+        
+        if not gemini_response['success']:
+            # Use fallback response
+            result = get_fallback_response()
+        else:
+            # Parse Gemini response
+            result = parse_gemini_response(gemini_response['content'])
+        
+        # Convert to response format
+        predictions = []
+        for pred in result.get('predictions', []):
+            predictions.append(PredictionResult(
+                condition=pred.get('label', 'Unknown'),
+                score=float(pred.get('probability', 0.0)),
+                explanation=pred.get('explanation', '')
+            ))
+        
+        # Limit to top 3 predictions
+        predictions = predictions[:3]
+        
+        # Create response
+        response = SymptomCheckResponse(
+            predictions=predictions,
+            model_version=result.get('model_version', 'gemini-llm-v1'),
+            triage=result.get('triage', 'refer'),
+            confidence=float(result.get('confidence', 0.0)),
+            recommendation_text=result.get('recommendation_text', 'Please consult a clinician.')
+        )
+        
+        # Cache the response
+        cache[cache_key] = {
+            'response': response.dict(),
+            'timestamp': time.time()
+        }
+        save_cache(cache)
+        
+        # Log the request (anonymized)
+        top_prediction = predictions[0].condition if predictions else 'unknown'
+        log_request(cache_key, top_prediction, response.confidence, response.triage, response.model_version)
+        
+        return response
+        
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+        # Return fallback response on any error
+        fallback = get_fallback_response()
+        predictions = [PredictionResult(
+            condition=p['label'],
+            score=float(p['probability']),
+            explanation=p['explanation']
+        ) for p in fallback['predictions']]
+        
+        return SymptomCheckResponse(
+            predictions=predictions,
+            model_version=fallback['model_version'],
+            triage=fallback['triage'],
+            confidence=fallback['confidence'],
+            recommendation_text=fallback['recommendation_text']
+        )
 
 # Error handling
 @app.exception_handler(Exception)

@@ -1,0 +1,71 @@
+Symptom Checker LLM Integration Guide
+=====================================
+
+API ENDPOINT: /api/symptom-checker/predict
+METHOD: POST
+
+REQUEST FORMAT:
+{
+  "description": "Patient symptom description",
+  "symptoms": ["symptom1", "symptom2"],
+  "age": 25,
+  "sex": "male|female|other",
+  "onset_days": 2,
+  "severity": "mild|moderate|severe",
+  "comorbidities": ["condition1", "condition2"]
+}
+
+RESPONSE FORMAT:
+{
+  "predictions": [
+    {
+      "condition": "Diagnosis name",
+      "score": 0.85,
+      "explanation": "Brief reasoning"
+    }
+  ],
+  "model_version": "gemini-llm-v1",
+  "triage": "emergency|urgent|non-urgent|self-care|refer",
+  "confidence": 0.85,
+  "recommendation_text": "Medical advice and next steps"
+}
+
+FRONTEND INTEGRATION:
+```javascript
+const response = await fetch('http://localhost:5000/api/symptom-checker/predict', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        description: symptomsText,
+        symptoms: symptomsList,
+        age: parseInt(age) || null,
+        sex: document.getElementById('sex')?.value || '',
+        onset_days: parseInt(document.getElementById('onsetDays')?.value) || null,
+        severity: document.getElementById('severity')?.value || '',
+        comorbidities: []
+    })
+});
+
+const result = await response.json();
+// Handle triage levels: emergency, urgent, non-urgent, self-care, refer
+// Display predictions with confidence scores and explanations
+// Show AI recommendation text prominently
+```
+
+TRIAGE HANDLING:
+- emergency: Red alert, immediate medical attention
+- urgent: Orange alert, seek healthcare soon
+- non-urgent: Yellow alert, schedule doctor visit
+- self-care: Green alert, home care appropriate
+- refer: Blue alert, consult healthcare provider
+
+ENVIRONMENT SETUP:
+Set GEMINI_API_KEY environment variable before running:
+export GEMINI_API_KEY="your-gemini-api-key-here"
+
+FEATURES:
+- Caching: 24-hour cache for identical inputs
+- Fallback: Conservative responses when API fails
+- Privacy: No PII logged, anonymized request tracking
+- Safety: Emergency detection for life-threatening symptoms
+- Retry: Automatic retry on timeout errors
