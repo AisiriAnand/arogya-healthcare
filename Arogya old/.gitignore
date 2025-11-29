@@ -25,3 +25,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AROGYA Healthcare - Runtime files
+backend/symptom_checker/symptom_cache.json
+backend/symptom_checker/symptom_requests.log

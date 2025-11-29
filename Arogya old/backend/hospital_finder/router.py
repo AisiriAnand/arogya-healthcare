@@ -5,6 +5,19 @@ from .models import Hospital, HospitalSearchResponse, LocationSuggestion
 
 router = APIRouter(prefix="/hospital", tags=["hospital"])
 
+@router.get("/karnataka-stats")
+async def get_karnataka_stats():
+    """Get Karnataka hospital statistics and facility breakdown"""
+    try:
+        stats = hospital_service.karnataka_enhancer.get_karnataka_hospital_stats(hospital_service.hospitals)
+        return {
+            "success": True,
+            "data": stats,
+            "message": "Karnataka hospital statistics retrieved successfully"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/search-location", response_model=List[Hospital])
 async def search_by_location(
     q: str = Query(..., description="Location name to search")
