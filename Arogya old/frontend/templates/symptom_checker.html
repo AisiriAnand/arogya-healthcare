@@ -830,7 +830,7 @@ document.getElementById('symptomForm').addEventListener('submit', async function
         }
         
         // Call backend API
-        const response = await fetch('http://localhost:5000/api/symptom-checker/predict', {
+        const response = await fetch('http://localhost:5000/symptom-checker/predict', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
