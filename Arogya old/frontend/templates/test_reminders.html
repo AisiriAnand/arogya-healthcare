@@ -83,7 +83,7 @@ document.getElementById('reminderForm').addEventListener('submit', async functio
     };
     
     try {
-        const response = await fetch('/medication/reminders', {
+        const response = await fetch('http://localhost:5000/medication/reminders', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ document.getElementById('reminderForm').addEventListener('submit', async functio
 // Load reminders
 async function loadReminders() {
     try {
-        const response = await fetch('/medication/reminders');
+        const response = await fetch('http://localhost:5000/medication/reminders');
         const reminders = await response.json();
         
         const container = document.getElementById('remindersList');
@@ -148,7 +148,7 @@ async function deleteReminder(reminderId) {
     if (!confirm('Are you sure you want to delete this reminder?')) return;
     
     try {
-        const response = await fetch(`/medication/reminders/${reminderId}`, {
+        const response = await fetch(`http://localhost:5000/medication/reminders/${reminderId}`, {
             method: 'DELETE'
         });
         
