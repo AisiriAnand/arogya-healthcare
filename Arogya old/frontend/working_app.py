@@ -57,7 +57,7 @@ def hospital_finder():
 @app.route('/medication-reminders')
 def medication_reminders():
     try:
-        return render_template('medication_reminders.html')
+        return render_template('test_reminders.html')
     except Exception as e:
         return f'<h1>Medication Reminders</h1><p>Template Error: {str(e)}</p><p><a href="/">Home</a></p>'
 
