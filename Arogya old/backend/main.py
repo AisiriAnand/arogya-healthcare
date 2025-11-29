@@ -8,7 +8,13 @@ from pydantic import BaseModel
 from datetime import datetime
 from pathlib import Path
 
+# Import hospital finder router
+from hospital_finder.router import router as hospital_router
+
 app = FastAPI(title="Rural Healthcare Backend", version="1.0.0")
+
+# Include hospital finder router
+app.include_router(hospital_router)
 
 # CORS middleware
 app.add_middleware(

@@ -47,6 +47,13 @@ def find_hospitals():
     except Exception as e:
         return f'<h1>Find Hospitals</h1><p>Template Error: {str(e)}</p><p><a href="/">Home</a></p>'
 
+@app.route('/hospital-finder')
+def hospital_finder():
+    try:
+        return render_template('hospital_finder.html')
+    except Exception as e:
+        return f'<h1>Hospital Finder</h1><p>Template Error: {str(e)}</p><p><a href="/">Home</a></p>'
+
 @app.route('/medication-reminders')
 def medication_reminders():
     try:
